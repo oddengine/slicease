@@ -1,0 +1,84 @@
+<html>
+<head>
+	<title>Html5 Canvas Test</title>
+	<script type="text/javascript" src='scripts/Slicer.js'></script>
+	<script type="text/javascript" src='scripts/utils.js'></script>
+	<!--<script type="text/javascript" src='scripts/Tweener.js'></script>-->
+	<script>
+		function log(msg){
+			document.getElementById('logarea').value += msg + '\n';
+		}
+	</script>
+</head>
+
+<body>
+	<canvas id='canvas' width='960' height='500'>
+		Canvas not supported
+	</canvas>
+	<button id='prevbtn' type='button'>Prev</button>
+	<textarea id='logarea' style='width:100%; height:200px;' readonly='readonly'></textarea>
+	
+	<script>
+		var c = document.getElementById("canvas");
+		var ctx = c.getContext("2d");
+		
+		var nc = document.createElement('canvas');
+		var nctx = nc.getContext('2d');
+		nc.width = c.width;
+		nc.height = c.height;
+		
+		nctx.beginPath();
+		nctx.moveTo(100, 100);
+		nctx.lineTo(50, 150);
+		nctx.lineTo(200, 100);
+		nctx.closePath();
+		//nctx.stroke();
+		nctx.clip();
+		nctx.setTransform(1, 0, -0.5, 0.5, 50, 50);
+		//nctx.fillStyle = 'green';
+		//nctx.fill();
+		
+		
+		var img = new Image();
+		img.src = 'contents/img1.png';
+		img.onload = function(){
+			nctx.drawImage(img, 200, 0, 300, img.height, 100, 100, 100, 100);
+			ctx.drawImage(nc, 0, 0, c.width, c.height);
+			
+			nc.width = nc.width;
+			
+			nctx.beginPath();
+			nctx.moveTo(200, 100);
+			nctx.lineTo(50, 150);
+			nctx.lineTo(175, 150);
+			nctx.closePath();
+			//nctx.stroke();
+			nctx.clip();
+			nctx.setTransform(1, 0, -0.25, 0.5, 25, 50);
+			
+			nctx.drawImage(img, 200, 0, 300, img.height, 75, 100, 125, 100);
+			ctx.drawImage(nc, 0, 0, c.width, c.height);
+			
+			nc.width = nc.width;
+			
+			nctx.beginPath();
+			nctx.moveTo(100, 200);
+			nctx.lineTo(150, 250);
+			nctx.lineTo(200, 200);
+			nctx.closePath();
+			//nctx.stroke();
+			//nctx.clip();
+			nctx.setTransform(1, 0, -0.5, 0.5, 100, 100);
+			
+			nctx.drawImage(img, 200, 0, 300, img.height, 100, 200, 100, 100);
+			ctx.drawImage(nc, 0, 0, c.width, c.height);
+		};
+		
+		
+		var prevbtn = document.getElementById('prevbtn');
+		prevbtn.onclick = function(){
+			
+		};
+	</script>
+</body>
+</html>
