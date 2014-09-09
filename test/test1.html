@@ -34,7 +34,7 @@
 		nctx.fillRect(0, 0, 200, 100);
 		
 		var img = new Image();
-		img.src = 'contents/img1.png';
+		img.src = '../contents/img1.png';
 		img.onload = function(){
 			ctx.drawImage(nc, 0, 0, c.width, c.height, 0, 0, nc.width, nc.width);
 			ctx.drawImage(img, 0, 0, img.width, img.height, 0, 200, 200, 200);

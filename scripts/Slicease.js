@@ -12,7 +12,7 @@
 	this.fps = 30;
 	this.xmove = [];
 	this.zmove = [];
-	this.sideFillStyle = '#555555';
+	this.sideFillStyle = '#666666';
 	
 	//Runtime params
 	this.canvas = null;
@@ -72,7 +72,7 @@ Slicease.prototype.init = function(){
 	}
 	if(this.xmove.length == 0){
 		for(var i=0; i<this.images.length; i++){
-			this.xmove.push({vo:0, a:0.5, cs:90, ca1:-3, ca2:1, so:0, delay:3, state:-1});
+			this.xmove.push({vo:0, a:0.5, cs:90, ca1:-3, ca2:1, so:0, delay:5, state:-1});
 			this.zmove.push({vo:40, a:-4, cs:0, ca1:-8, ca2:2, so:0, delay:-1, state:-1});
 		}
 	}
