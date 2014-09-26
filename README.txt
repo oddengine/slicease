@@ -1,1 +1,5 @@
-This is a 3D image rotator with animation easing, for my proposed website, using html5 canvas and pure javascript. The idea came from an open-sourced flash project named Piecemaker. I like the work, and flash too. However, I'd like to build my website with my own hands. This animation is open-sourced too, thought the code may be urgly :)
+This is a 3D image rotator with animation easing based on Bezier curve, 
+which was planned as the tile of my proposed website. 
+
+It is easy to config, and built with html5 canvas and pure javascript. 
+This project is open-sourced with MIT lisence. Enjoy it at wherever you like :)
