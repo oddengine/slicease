@@ -1,0 +1,4 @@
+﻿Elastic = function(){
+	
+};
+

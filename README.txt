@@ -1,0 +1,1 @@
+This is a 3D image rotator with animation easing, for my proposed website, using html5 canvas and pure javascript. The idea came from an open-sourced flash project named Piecemaker. I like the work, and flash too. However, I'd like to build my website with my own hands. This animation is open-sourced too, thought the code may be urgly :)

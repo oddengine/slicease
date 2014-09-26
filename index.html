@@ -2,15 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" dir="ltr" lang="en">
 <head>
 	<title>Html5 Canvas Test</title>
-	<script type="text/javaScript" src="scripts/Slicease.js"></script>
-	<script type="text/javaScript" src="scripts/utils.js"></script>
-	<script>
-		function log(msg){
-			document.getElementById('logarea').value += msg + '\n';
-		}
-	</script>
+	<script type="text/javaScript" src="js/cn/studease/globle.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/utils/Func.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/utils/Timer.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/utils/P.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/RepeatBehavior.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/TimingFunction.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/Animation.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/easing/Bezier.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/easing/CubicBezier.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/easing/Ease.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/easing/Linear.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/slicease/Slicease.js"></script>
 </head>
-
 <body>
 	<canvas id='canvas' width='960' height='500'>
 		Canvas not supported
@@ -18,22 +22,21 @@
 	<button id='prevbtn' type='button'>Prev</button>
 	<button id='nextbtn' type='button'>Next</button>
 	<button id='clearbtn' type='button'>Clear</button>
-	<textarea id='logarea' style='width:100%; height:200px;' readonly='readonly'></textarea>
 	
 	<script type="text/javaScript">
 		var slicease = new Slicease();
-		slicease.setup({canvId:'canvas', images:['contents/img1.png', 'contents/img2.png', 'contents/img3.png'], pieces:[4, 5, 3]});
+		slicease.setup({canvas_id:'canvas', images:['contents/img1.png', 'contents/img2.png', 'contents/img3.png'], pieces:[5, 4, 6]});
+		slicease.init();
+		slicease.play();
 		
 		var prevbtn = document.getElementById('prevbtn');
 		prevbtn.onclick = function(){
-			slicease.init();
-			slicease.run(slicease.img_p);
+			slicease.play(slicease.img_p);
 		};
 		
 		var nextbtn = document.getElementById('nextbtn');
 		nextbtn.onclick = function(){
-			slicease.init();
-			slicease.run(slicease.img_n);
+			slicease.play(slicease.img_n);
 		};
 		
 		var clearbtn = document.getElementById('clearbtn');
