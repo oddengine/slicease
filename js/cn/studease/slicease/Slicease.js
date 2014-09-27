@@ -20,6 +20,7 @@
 	this.screen_z = 700;
 	this.object_z = 800;
 	
+	this.mark_func = null;
 	this.strokeStyle = 'rgb(0,0,250)';
 	this.sideColor = '#999999';
 	
@@ -44,7 +45,7 @@
 	this.ready = false;
 	this.running = false;
 	this.playing = false;
-	this.direction = 0;// scroll down: 0, scroll up: -1
+	this.direction = -1;// scroll down: 0, scroll up: -1
 	this.timer = null;
 	this.timer_draw = null;
 	
@@ -161,7 +162,7 @@ Slicease.prototype.startWaiting = function(){
 	return started;
 };
 
-Slicease.prototype.play = function(index){
+Slicease.prototype.play = function(index, direction){
 	if(this.ready == false || this.playing == true || index != null && (index >= this.images.length || index < 0)){
 		return -1;
 	}
@@ -170,9 +171,17 @@ Slicease.prototype.play = function(index){
 		this.timer.reset();
 	}
 	
-	this.img_p = this.img_c < 0 ? this.images.length-1 : this.img_c;
-	this.img_c = index || this.img_n;
-	this.img_n = this.img_c < this.images.length-1 ? (this.img_c+1) : 0;
+	if(index != null && (index < this.img_c 
+		|| this.img_c == 0 && index == this.images.length-1 && direction != null && direction < 0)){
+		this.direction = -1;
+	}
+	else{
+		this.direction = 0;
+	}
+	
+	this.img_p = this.img_c<0 ? this.images.length-1 : this.img_c;
+	this.img_c = index==null ? (this.img_c==this.images.length-1 ? 0: this.img_c+1) : index;
+	this.img_n = this.direction>=0 ? (this.img_c==this.images.length-1 ? 0: this.img_c+1) : (this.img_c==0 ? this.images.length-1: this.img_c-1);
 	
 	this.points = [];
 	var pieces = this.pieces[this.img_c];
@@ -190,6 +199,16 @@ Slicease.prototype.play = function(index){
 	}
 	
 	this.startDrawing();
+	
+	if(this.mark_func != null){
+		this.mark_func.doit(this.img_c);
+	}
+	
+	return this.img_c;
+};
+Slicease.prototype.prev = function(){
+	var indx = this.img_c==0 ? this.images.length-1 : this.img_c-1;
+	return this.play(indx, -1);
 };
 
 Slicease.prototype.startDrawing = function(){
@@ -356,7 +375,7 @@ Slicease.prototype.draw = function(){
 				var pw = Math.floor(img.width / pieces);
 				
 				this.transform(img, i*pw, 0, i==pieces?img.width-i*pw:pw, img.height, P(btx0,bty0), P(ctx0,cty0), P(ctx1,cty1), null, below);
-				this.transform(img, i*pw, 0, i==pieces?img.width-i*pw:pw, img.height, P(btx0,bty0), null, P(ctx1,cty1), P(dtx1,dty1), below);
+				this.transform(img, i*pw, 0, i==pieces?img.width-i*pw:pw, img.height, P(btx0,bty0), null, P(ctx1,cty1), P(btx1,bty1), below);
 			}
 		}
 		//front side
