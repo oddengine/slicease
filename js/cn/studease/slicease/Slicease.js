@@ -118,13 +118,13 @@ Slicease.prototype.init = function(){
 	}
 	
 	if(this.easing_load_r == null){
-		this.easing_load_r = new Animation(this.duration/2, 45, 90);
+		this.easing_load_r = new Animation(this.duration/3, 45, 90);
 	}
 	if(this.easing_load_z == null){
-		this.easing_load_z = new Animation(this.duration/2, this.object_z+500, this.object_z);
+		this.easing_load_z = new Animation(this.duration/3, this.object_z+500, this.object_z);
 	}
 	if(this.easing_load_a == null){
-		this.easing_load_a = new Animation(this.duration/2, 0, 100);
+		this.easing_load_a = new Animation(this.duration/3, 0, 100);
 	}
 	if(this.easing_r == null){
 		this.easing_r = new Animation(this.duration, 0, 90);
