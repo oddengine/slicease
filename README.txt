@@ -22,7 +22,8 @@ Then, as the index.html does, here we go~
 var slicease = new Slicease();
 var markfunc = new Func();
 markfunc.setup(markIndex);
-var config = {canvas_id: 'canvas', 
+var config = {
+	canvas_id: 'canvas', 
 	images: ['contents/img1.png', 'contents/img2.png', 'contents/img3.png'], 
 	pieces: [5, 4, 6],
 	mark_func: markfunc
