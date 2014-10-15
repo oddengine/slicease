@@ -1,7 +1,9 @@
-﻿Func = function(){
+﻿Func = function(func, thisArg, args){
 	this.func = null;
 	this.thisArg = null;
 	this.args = null;
+	
+	this.setup(func, thisArg, args);
 };
 	
 Func.prototype.setup = function(func, thisArg, args){
