@@ -13,6 +13,7 @@
 	<script type="text/javaScript" src="js/cn/studease/animation/easing/CubicBezier.js"></script>
 	<script type="text/javaScript" src="js/cn/studease/animation/easing/Ease.js"></script>
 	<script type="text/javaScript" src="js/cn/studease/animation/easing/Linear.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/easing/Elastic.js"></script>
 	<script type="text/javaScript" src="js/cn/studease/slicease/Slicease.js"></script>
 	<style type="text/css">
 		.clear{
@@ -24,7 +25,7 @@
 			margin-right: auto;
 		}
 		.se-ctrl-n{
-			width: 960px;
+			width: 1200px;
 			height: 20px;
 			position: absolute;
 			top: 460px;
@@ -50,7 +51,7 @@
 	</style>
 </head>
 <body>
-	<canvas id='canvas' width='960' height='500'>
+	<canvas id='canvas' width='1200' height='500'>
 		Canvas not supported
 	</canvas>
 	<div class='se-ctrl-n clear'>
@@ -70,7 +71,7 @@
 		markfunc.setup(markIndex);
 		var config = {canvas_id: 'canvas', 
 			images: ['contents/img1.png', 'contents/img2.png', 'contents/img3.png'], 
-			pieces: [5, 4, 6],
+			pieces: [8, 10, 11],
 			mark_func: markfunc
 		};
 		slicease.setup(config);

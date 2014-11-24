@@ -4,7 +4,7 @@
 	this.images = [];
 	
 	//Available settings
-	this.padding = [50, 0, 70, 0];
+	this.padding = [50, 40, 70, 40];
 	this.pieces = [];
 	this.delays = [];
 	
@@ -15,7 +15,7 @@
 	this.easing_r = null;
 	this.easing_z = null
 	
-	this.interval = 5000;
+	this.interval = 3500;
 	this.fps = 30;
 	this.screen_z = 700;
 	this.object_z = 800;
@@ -91,7 +91,7 @@ Slicease.prototype.init = function(){
 	this.tctx = this.tcan.getContext('2d');
 	
 	if(this.padding.length < 4){
-		var padding = [50, 0, 70, 0];
+		var padding = [50, 40, 70, 40];
 		for(var i=this.padding.length-1; i<4; i++){
 			this.padding[i] = padding[i];
 		}
@@ -101,7 +101,7 @@ Slicease.prototype.init = function(){
 	this.radius = this.height * Math.SQRT1_2;
 	
 	if(this.pieces.length == 0){
-		this.pieces[0] = 5;
+		this.pieces[0] = 10;
 	}
 	var last_p = this.pieces[this.pieces.length-1];
 	for(var p=this.pieces.length; p<this.images.length; p++){
@@ -118,22 +118,24 @@ Slicease.prototype.init = function(){
 	}
 	
 	if(this.easing_load_r == null){
-		this.easing_load_r = new Animation(this.duration/2, 45, 90);
+		this.easing_load_r = new Animation(this.duration/3, 45, 90);
 	}
 	if(this.easing_load_z == null){
-		this.easing_load_z = new Animation(this.duration/2, this.object_z+500, this.object_z);
+		this.easing_load_z = new Animation(this.duration/2, this.object_z+800, this.object_z);
 	}
 	if(this.easing_load_a == null){
 		this.easing_load_a = new Animation(this.duration/2, 0, 100);
 	}
 	if(this.easing_r == null){
-		this.easing_r = new Animation(this.duration, 0, 90);
+		this.easing_r = new Animation(this.duration, 0, 90, {
+			easing: new Elastic()
+		});
 	}
 	if(this.easing_z == null){
-		var es_z = new Bezier([P(0,0), P(0.45,0.8), P(0.55,0.8), P(0,0)]);
-		var ani_z = new Animation(this.duration, this.object_z, this.object_z);
-		ani_z.setup({unitValue:500/(2/3), easing:es_z});
-		this.easing_z = ani_z;
+		this.easing_z = new Animation(this.duration*0.75, this.object_z, this.object_z, {
+			unitValue: 1000,//it's necessary when and only when Animation.startValue == Animation.endValue
+			easing: new Bezier([P(0,0), P(0.45,1), P(0.75,0.25), P(1,0)])
+		});
 	}
 	
 	this.ready = true;
