@@ -25,7 +25,7 @@ markfunc.setup(markIndex);
 var config = {
 	canvas_id: 'canvas', 
 	images: ['contents/img1.png', 'contents/img2.png', 'contents/img3.png'], 
-	pieces: [5, 4, 6],
+	pieces: [8, 10, 11],
 	mark_func: markfunc
 };
 slicease.setup(config);
