@@ -63,13 +63,13 @@
 	</div>
 	<button id='prevbtn' type='button'>Prev</button>
 	<button id='nextbtn' type='button'>Next</button>
-	<button id='clearbtn' type='button'>Clear</button>
 	
 	<script type="text/javaScript">
 		slicease = new Slicease();
 		var markfunc = new Func();
 		markfunc.setup(markIndex);
-		var config = {canvas_id: 'canvas', 
+		var config = {
+			canvas_id: 'canvas', 
 			images: ['contents/img1.png', 'contents/img2.png', 'contents/img3.png'], 
 			pieces: [8, 10, 11],
 			mark_func: markfunc
@@ -86,12 +86,6 @@
 		var nextbtn = document.getElementById('nextbtn');
 		nextbtn.onclick = function(){
 			slicease.play();
-		};
-		
-		var clearbtn = document.getElementById('clearbtn');
-		clearbtn.onclick = function(){
-			slicease.canvas.width = slicease.canvas.width;
-			//slicease.clearRect(0, 0, slicease.canvas.width, slicease.canvas.height);
 		};
 		
 		
