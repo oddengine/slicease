@@ -1,5 +1,5 @@
 (function(slicease) {
-	var utils = jwplayer.utils;
+	var utils = slicease.utils;
 	
     slicease.slicer = function(config) {
         var _this = this,
@@ -293,4 +293,4 @@
         _init();
     };
 
-})(window.slicease);
+})(slicease);
