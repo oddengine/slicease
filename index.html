@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" dir="ltr" lang="en">
+<head>
+	<title>Html5 Canvas Test</title>
+	<script type="text/javaScript" src="js/cn/studease/global.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/utils/Func.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/utils/Timer.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/utils/P.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/RepeatBehavior.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/TimingFunction.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/Animation.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/easing/Bezier.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/easing/CubicBezier.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/easing/Ease.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/easing/Linear.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/animation/easing/Elastic.js"></script>
+	<script type="text/javaScript" src="js/cn/studease/slicease/Slicease.js"></script>
+	<style type="text/css">
+		.clear{
+			clear: both;
+			display: block;
+		}
+		.center{
+			margin-left: auto;
+			margin-right: auto;
+		}
+		.se-ctrl-n{
+			width: 1200px;
+			height: 20px;
+			position: absolute;
+			top: 460px;
+		}
+		.se-ctrl-n ul{
+			padding: 0;
+			margin-top: 0;
+			margin-bottom: 0;
+			width: 100px;
+		}
+		.se-ctrl-n ul li{
+			float: left;
+			list-style-type: none;
+			padding: 0 10px 0 0;
+			height: 20px;
+		}
+		.se-ctrl-n ul li a{
+			padding: 3px 6px 2px 6px;
+			font-size: 12px;
+			cursor: pointer;
+			background: #cccccc;
+		}
+	</style>
+</head>
+<body>
+	<canvas id='canvas' width='1200' height='500'>
+		Canvas not supported
+	</canvas>
+	<div class='se-ctrl-n clear'>
+		<ul class='center'>
+			<li><a id='indx_0' onclick="javascript:play(0)">1</a></li>
+			<li><a id='indx_1' onclick="javascript:play(1)">2</a></li>
+			<li><a id='indx_2' onclick="javascript:play(2)">3</a></li>
+		</ul>
+	</div>
+	<button id='prevbtn' type='button'>Prev</button>
+	<button id='nextbtn' type='button'>Next</button>
+	
+	<script type="text/javaScript">
+		slicease = new Slicease();
+		var markfunc = new Func();
+		markfunc.setup(markIndex);
+		var config = {
+			canvas_id: 'canvas', 
+			images: ['contents/img1.png', 'contents/img2.png', 'contents/img3.png'], 
+			pieces: [8, 10, 11],
+			mark_func: markfunc
+		};
+		slicease.setup(config);
+		slicease.init();
+		slicease.play();
+		
+		var prevbtn = document.getElementById('prevbtn');
+		prevbtn.onclick = function(){
+			slicease.prev();
+		};
+		
+		var nextbtn = document.getElementById('nextbtn');
+		nextbtn.onclick = function(){
+			slicease.play();
+		};
+		
+		
+		function play(n){
+			if(slicease != null){
+				slicease.play(n);
+			}
+		}
+		function markIndex(index){
+			if(index < 0){
+				return;
+			}
+			
+			for(var i=0; i<slicease.images.length; i++){
+				var a = document.getElementById('indx_' + i);
+				if(a == null){
+					continue;
+				}
+				
+				if(i == index){
+					a.style.background = '#999999';
+					continue;
+				}
+				
+				a.style.background = '#cccccc';
+			}
+		}
+	</script>
+</body>
+</html>

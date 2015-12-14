@@ -1,0 +1,57 @@
+﻿.clearfix:after {
+	content: '\200B';
+	display: block;
+	height: 0;
+	clear: both;
+}
+
+.clearfix {
+	display: block;
+	*zoom: 1;/*IE/7/6*/
+}
+
+.center {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+html, body {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background: #585862;
+}
+
+.wrap {
+	width: 980px;
+}
+
+.slider {
+	width: 100%;
+	height: 490px;
+	background: #ddd;
+	position: relative;
+}
+
+.slider canvas, .slider .se-controls, .slider .se-pages {
+	width: 100%;
+}
+
+.slider canvas {
+	height: 100%;
+}
+
+.slider .se-controls {
+	height: 360px;
+	top: 50px;
+	filter: Alpha(opacity=0);
+	opacity: 0;
+	position: absolute;
+}
+
+.slider .se-pages {
+	
+}
+
