@@ -3,5 +3,5 @@
 		core = slicease.core,
 		css = utils.css;
 	
-	core.render = {};
+	core.renders = {};
 })(slicease);

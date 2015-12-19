@@ -12,14 +12,18 @@
 		_this.embed = function() {
 			utils.emptyElement(api.container);
 			var slicer = new core.slicer(config);
-			slicer.addEventListener(events.SLICEASE_SETUP_ERROR, _onSetupError);
+			slicer.addGlobalListener(_onEvent);
 			slicer.setup();
-            api.setSlicer(slicer, _this.renderMode);
-        };
-        
-        function _onSetupError(e) {
-        	_this.dispatchEvent(events.SLICEASE_SETUP_ERROR, e);
-        }
+			api.setSlicer(slicer, _this.renderMode);
+		};
+		
+		function _onEvent(e) {
+			_forward(e);
+		}
+		
+		function _forward(e) {
+			_this.dispatchEvent(e.type, e);
+		}
         
 		_this.supports = function() {
             return true;

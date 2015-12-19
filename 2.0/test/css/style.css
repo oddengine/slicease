@@ -24,34 +24,87 @@ body {
 	background: #585862;
 }
 
-.wrap {
-	width: 980px;
-}
-
-.slider {
-	width: 100%;
-	height: 490px;
-	background: #ddd;
+.sewrap {
+	margin: 0 auto;
+	padding: 0;
+	width: 1200px;
+	height: 500px;
 	position: relative;
+	display: block;
+	background: #999;
 }
 
-.slider canvas, .slider .se-controls, .slider .se-pages {
-	width: 100%;
+.semenu {
+	display: none;
 }
 
-.slider canvas {
-	height: 100%;
+.semain {
+	display: block;
 }
 
-.slider .se-controls {
-	height: 360px;
+.seimages {
+	display: block;
+}
+
+.secontrols {
+	margin: 0;
+	padding: 0;
+	width: 1200px;
+	height: 380px;
+	position: absolute;
 	top: 50px;
+}
+
+.sedisplay {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
 	filter: Alpha(opacity=0);
 	opacity: 0;
+}
+
+.sedisplay:hover {
+	filter: Alpha(opacity=100);
+	opacity: 1;
+}
+
+.seprev, .senext {
+	width: 40px;
+	height: 380px;
+	line-height: 380px;
+	display: inline;
+	vertical-align: middle;
+	cursor: pointer;
+	background: #ccc;
+}
+
+.seprev {
+	float: left;
+}
+
+.senext {
+	float: right;
+}
+
+.sepager {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 20px;
 	position: absolute;
+	top: 410px;
 }
 
-.slider .se-pages {
-	
+.sepager span {
+	text-align:center;
+	display: block;
 }
 
+.sepager a {
+	margin: 0 10px 0 0;
+	padding: 3px 8px;
+	font-size: 12px;
+	cursor: pointer;
+	background: #999;
+}

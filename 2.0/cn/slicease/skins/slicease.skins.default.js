@@ -1,9 +1,8 @@
 (function(slicease) {
-	var utils = slicease.utils,
-		skin;
+	var utils = slicease.utils;
+	
 	slicease.skins.default = function() {
 		var _this = this,
-			_this.type = 'svg',
 			_skin,
 			_svgAttr = {
 				id: 'seskin_default',
@@ -31,6 +30,7 @@
 			}];
 		
 		function _init() {
+			_this.type = 'svg';
 			_skin = document.createElement('svg');
 			_addAttr(_skin, _svgAttr);
 			

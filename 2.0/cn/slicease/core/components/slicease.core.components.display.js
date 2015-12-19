@@ -1,15 +1,28 @@
 (function(slicease) {
 	var utils = slicease.utils,
+	events = slicease.events,
 		core = slicease.core,
-		component = core.component,
+		components = core.components,
 		css = utils.css,
 		
 		DISPLAY_CONTAINER_CLASS = 'sedisplay',
 		DISPLAY_PREV_CLASS = 'seprev',
-		DISPLAY_NEXT_CLASS = 'senext';
+		DISPLAY_NEXT_CLASS = 'senext',
+		
+		DISPLAY_HIDE_DELAY = 2000,
+		
+		HIDDEN = {
+			display: 'none'
+		},
+		SHOWING = {
+			display: 'block'
+		},
+		NOT_HIDDEN = {
+			display: ''
+		};
 	
-	component.display = function(slicer, config) {
-		var _this = this,
+	components.display = function(slicer, config) {
+		var _this = utils.extend(this, new events.eventdispatcher()),
 			_display,
 			_prev,
 			_next,
@@ -54,26 +67,30 @@
 			slicer.runnable(true);
 		}
 		
+		_this.hide = function(immediate) {
+			setTimeout(_hide, immediate ? 0 : DISPLAY_HIDE_DELAY);
+		};
+		function _hide() {
+			css.style(_this.element(), HIDDEN);
+		}
+		
+		_this.show = function() {
+			css.style(_this.element(), SHOWING);
+		};
+		
 		_this.element = function() {
 			return _display;
+		};
+		
+		_this.destroy = function() {
+			if (_display) {
+				_display.removeEventListener('onmouseover', _onMouseOver);
+				_display.removeEventListener('onmouseout', _onMouseOut);
+			}
 		};
 		
         _init();
 	};
 	
-	css(D_CLASS, {
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        overflow: 'hidden'
-    });
-
-    _css(D_CLASS + ' ' + D_PREVIEW_CLASS, {
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        background: '#000 no-repeat center',
-        overflow:'hidden',
-        opacity: 0
-    });
+	
 })(slicease);

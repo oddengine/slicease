@@ -47,14 +47,22 @@
 				}
 			}
 			
-			_embedder.addEventListener(events.SLICEASE_SETUP_ERROR, _onSetupError);
+			_embedder.addGlobalListener(_onEvent);
 			_embedder.embed();
 			_insertCSS();
-        };
+		};
 		
-		function _onSetupError(e) {
-			_errorScreen(_errorText + e.message);
-			_dispatchSetupError(e.message);
+		function _onEvent(e) {
+			switch (e.type) {
+				case events.ERROR:
+				case events.SLICEASE_SETUP_ERROR:
+				case events.SLICEASE_RENDER_ERROR:
+					_errorScreen(e.message);
+					break;
+				default:
+					break;
+			}
+			_forward(e);
 		}
 		
 		function _errorScreen(message) {
@@ -66,11 +74,8 @@
 			_displayError(api.container, message, _config);
 		}
 		
-		function _dispatchSetupError(message) {
-			_this.dispatchEvent(events.SLICEASE_SETUP_ERROR, {
-				message: message
-			});
-			utils.log(message);
+		function _forward(e) {
+			_this.dispatchEvent(e.type, e);
 		}
 		
 		_this.errorScreen = _errorScreen;

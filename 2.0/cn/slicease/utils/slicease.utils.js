@@ -148,7 +148,7 @@
 		if (typeof console.log === 'object') {
 			console.log(args);
 		} else {
-			console.log.apply(console, args);
+			//console.log.apply(console, args);
 		}
 	};
 	

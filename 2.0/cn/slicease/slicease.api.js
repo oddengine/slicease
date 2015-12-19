@@ -4,10 +4,8 @@
 	
 	var _apis = [];
 	var _eventMapping = {
-		onError: events.SLICEASE_ERROR,
-		onSetupError: events.SLICEASE_SETUP_ERROR,
+		onError: events.ERROR,
 		onReady: events.SLICEASE_READY,
-		onResize: events.SLICEASE_RESIZE,
 		onRenderMode: events.SLICEASE_RENDER_MODE,
 		onState: events.SLICEASE_STATE
 	};
@@ -30,13 +28,17 @@
 			
 			_this.config = options;
 			_this.embedder = new slicease.embed(_this);
-			_this.embedder.addEventListener(events.SLICEASE_SETUP_ERROR, _onEvent);
+			_this.embedder.addGlobalListener(_onEvent);
 			_this.embedder.embed();
 			
 			return _this;
 		};
 		
 		function _onEvent(e) {
+			_forward(e);
+		}
+		
+		function _forward(e) {
 			_this.dispatchEvent(e.type, e);
 		}
 		

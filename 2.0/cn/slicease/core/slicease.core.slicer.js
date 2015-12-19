@@ -12,14 +12,9 @@
 		function _init() {
 			_this.id = config.id;
 			_this.model = _model = new core.model(config);
-			_model.addEventListener(events.SLICEASE_STATE, _stateHandler);
-			_model.addEventListener(events.SLICEASE_ITEM, _itemHandler);
-			
 			_this.view = _view = new core.view(_this, _model);
-			_view.addEventListener(events.SLICEASE_READY, _onReady);
-			_view.addEventListener(events.SLICEASE_SETUP_ERROR, _onSetupError);
-			
 			_this.controller = _controller = new core.controller(_model, _view);
+			_controller.addGlobalListener(_forward);
 			
 			_initializeAPI();
 			_this.initializeAPI = _initializeAPI;
@@ -29,19 +24,7 @@
 			_view.setup();
 		};
 		
-		function _stateHandler(e) {
-			_forward(e);
-		}
-		
-		function _itemHandler(e) {
-			_forward(e);
-		}
-		
-		function _onReady(e) {
-			_controller.slicerReady(e);
-		}
-		
-		function _onSetupError(e) {
+		function _forward(e) {
 			_this.dispatchEvent(e.type, e);
 		}
 		
@@ -63,10 +46,6 @@
 					_model.destroy();
 				}
 			};
-		}
-		
-		function _forward(e) {
-			slicease(_this.id).dispatchEvent(e.type, e);
 		}
 		
 		_init();

@@ -52,19 +52,17 @@
 			_this.config = utils.deepExtend({}, _defaults, config);
 			utils.extend(_this, {
 				id: config.id,
-				item: 0,
-				state: events.state.IDLE
+				state: events.state.IDLE,
+				item: -1
 			}, _this.config);
 		}
 		
-		_this.setState = function(state) {
+		_this.setState = function(state, item) {
+			if (state === _this.state || item < 0 || item >= _this.sources.length) {
+				return;
+			}
 			_this.state = state;
-			_this.dispatchEvent(events.SLICEASE_STATE, { state: state });
-		};
-		
-		_this.setItem = function(index) {
-			_this.item = index;
-			_this.dispatchEvent(events.SLICEASE_ITEM, { index: index });
+			_this.dispatchEvent(events.SLICEASE_STATE, { state: state, item: item });
 		};
 		
 		_this.getConfig = function(name) {
