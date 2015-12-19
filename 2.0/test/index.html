@@ -3,25 +3,53 @@
 <head>
 	<title>Html5 Canvas Test</title>
 	<link type="text/css" rel="stylesheet" href="css/style.css" />
-	
+	<script type='text/javascript' src='../cn/slicease/slicease.js'></script>
+	<script type='text/javascript' src='../cn/slicease/utils/slicease.utils.js'></script>
+	<script type='text/javascript' src='../cn/slicease/events/slicease.events.js'></script>
+	<script type='text/javascript' src='../cn/slicease/events/slicease.events.eventdispatcher.js'></script>
+	<script type='text/javascript' src='../cn/slicease/slicease.api.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/slicease.core.js'></script>
+	<script type='text/javascript' src='../cn/slicease/embed/slicease.embed.js'></script>
+	<script type='text/javascript' src='../cn/slicease/embed/slicease.embed.config.js'></script>
+	<script type='text/javascript' src='../cn/slicease/embed/slicease.embed.spare.js'></script>
+	<script type='text/javascript' src='../cn/slicease/embed/slicease.embed.canvas.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/slicease.core.slicer.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/slicease.core.model.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/slicease.core.view.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/slicease.core.controller.js'></script>
 </head>
 <body>
-	<div calss='wrap center'>
-		<div class='slider'>
-			<canvas id='se-canvas'>Canvas not supported!</canvas>
-			<div class='se-controls'></div>
-			<div class='se-pages'>
-				<ul class='center clearfix'>
-					<li><a id='se-page-0' onclick="javascript:play(0)">1</a></li>
-					<li><a id='se-page-1' onclick="javascript:play(1)">2</a></li>
-					<li><a id='se-page-2' onclick="javascript:play(2)">3</a></li>
-				</ul>
-			</div>
+	<div class='center'>
+		<div id='slicer' class='sewrap'>
+			<div id='slicer_menu' class='semenu'></div>
+			<span id='slicer_view' class='semain'>
+				<span id='slicer_images' class='seimages'>
+					<canvas style='width: 1200px; height: 500px;'>Canvas not supported!</canvas>
+				</span>
+				<span id='slicer_controls' class='secontrols'>
+					<div id='slicer_display' class='sedisplay'>
+						<div class='seprev'>
+							<svg viewBox="0 0 1024 1024"><use xlink:href="#icon_prev" /></svg>
+						</div>
+						<div class='senext'>
+							<svg viewBox="0 0 1024 1024"><use xlink:href="#icon_next" /></svg>
+						</div>
+					</div>
+					<div id='slicer_pager' class='sepager'>
+						<a>1</a>
+						<a>2</a>
+						<a>3</a>
+					</div>
+				</span>
+			</span>
 		</div>
 	</div>
 	
 	<script type="text/javaScript">
-		
+		/*var sli = slicease('slicer').setup({
+			width: 1200,
+			height: 500
+		});*/
 	</script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 (function(slicease) {
-	var events = slicease.events,
-		utils = slicease.utils;
+	var utils = slicease.utils,
+		events = slicease.events;
 	
 	events.eventdispatcher = function(id, debug) {
 		var _id = id,

@@ -4,15 +4,20 @@
 		renderMode = events.renderMode;
 	
 	var embed = slicease.embed = function(api) {
-		var _this = this,
+		var _this = utils.extend(this, new events.eventdispatcher()),
 			_config = new embed.config(api.config),
 			_width = _config.width,
 			_height = _config.height,
 			_errorOccurred = false,
 			_errorText = 'Error embedding slicer: ',
-			_render = null;
+			_embedder = null;
 		
 		_config.id = api.id;
+		if (_config.aspectratio) {
+			api.config.aspectratio = _config.aspectratio;
+		} else {
+			delete api.config.aspectratio;
+		}
 		
 		utils.foreach(_config.events, function(e, cb) {
 			var fn = api[e];
@@ -25,28 +30,31 @@
 			api.container.style.width = _width.toString().indexOf('%') > 0 ? _width : (_width + 'px');
 			api.container.style.height = _height.toString().indexOf('%') > 0 ? _height : (_height + 'px');
 			
+			var configClone = utils.extend({}, _config);
 			try {
-				_render = new embed[_config.renderMode]();
+				_embedder = new embed[_config.renderMode](api, configClone);
 			} catch (e) {
 				utils.log('Render not found');
 			}
 			
-			if (!_render || !_render.supports()) {
+			if (!_embedder || !_embedder.supports()) {
 				if (_config.fallback) {
-					_render = new embed.spare();
+					_config.renderMode = configClone.renderMode = renderMode.SPARE;
+					_embedder = new embed.spare(api, configClone);
 				} else {
 					_errorScreen(_errorText + 'No suitable render found');
 					return;
 				}
 			}
 			
-			_render.addEventListener(events.SLICEASE_SETUP_ERROR, _onSetupError);
-			_render.embed();
+			_embedder.addEventListener(events.SLICEASE_SETUP_ERROR, _onSetupError);
+			_embedder.embed();
 			_insertCSS();
         };
 		
 		function _onSetupError(e) {
 			_errorScreen(_errorText + e.message);
+			_dispatchSetupError(e.message);
 		}
 		
 		function _errorScreen(message) {
@@ -56,7 +64,6 @@
 			
 			_errorOccurred = true;
 			_displayError(api.container, message, _config);
-			_dispatchSetupError(message);
 		}
 		
 		function _dispatchSetupError(message) {

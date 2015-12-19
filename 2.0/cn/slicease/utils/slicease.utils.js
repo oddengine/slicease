@@ -16,6 +16,46 @@
 		return obj;
 	};
 	
+	utils.deepExtend = function(obj, chi) {
+		switch (utils.typeOf(chi)) {
+			case 'object':
+				if (obj === undefined || obj === null) {
+					obj = {};
+				}
+				utils.foreach(chi, function(k, v) {
+					obj[k] = utils.deepExtend(obj[k], chi[k]);
+				});
+				break;
+			case 'array':
+				obj = utils.clone(chi);
+				break;
+			default:
+				obj = chi;
+		}
+		return obj;
+	};
+	
+	utils.clone = function(val) {
+		var obj;
+		switch (utils.typeOf(val)) {
+			case 'object':
+				obj = {};
+				utils.foreach(val, function(k, v) {
+					obj[k] = utils.clone(v);
+				});
+				break;
+			case 'array':
+				obj = [];
+				for (var i = 0; i < val.length; i++) {
+					obj.push(utils.clone(val[i]));
+				}
+				break;
+			default:
+				obj = val;
+		}
+		return obj;
+	};
+	
 	utils.foreach = function(data, fn) {
 		for (var key in data) {
 			if (data.hasOwnProperty && typeof data.hasOwnProperty === 'function') {
@@ -29,6 +69,14 @@
 		}
 	};
 	
+	
+	utils.createElement = function(elem, className) {
+		var newElement = document.createElement(elem);
+		if (className) {
+			newElement.className = className;
+		}
+		return newElement;
+	}
 	
 	utils.addClass = function(element, classes) {
 		var originalClasses = utils.typeOf(element.className) === 'string' ? element.className.split(' ') : [];

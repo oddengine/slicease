@@ -4,20 +4,15 @@
 		renderMode = events.renderMode,
 		embed = slicease.embed;
 	
-	embed.canvas = function(api) {
-		var _this = utils.extend(this, new embed.spare());
+	embed.canvas = function(api, config) {
+		var _this = utils.extend(this, new embed.spare(api, config));
 		_this.renderMode = renderMode.CANVAS;
 		
-		/*_this.embed = function() {
-			utils.emptyElement(api.container);
-			var options = utils.extend({}, api.config);
-			var slicer = new slicease.slicer(options);
-            api.setSlicer(slicer, _this.renderMode);
-        };*/
-		
 		_this.supports = function() {
-			
-			return false;
+			if (utils.isMSIE() && utils.isAndroidNative()) {
+				return false;
+			}
+			return true;
 		};
 	};
 })(slicease);

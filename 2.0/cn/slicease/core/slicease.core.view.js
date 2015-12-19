@@ -1,295 +1,98 @@
 (function(window) {
-    var jwplayer = window.jwplayer,
-        html5 = jwplayer.html5,
-        utils = jwplayer.utils,
-        events = jwplayer.events,
-        states = events.state,
-        _css = utils.css,
-        _bounds = utils.bounds,
-        _isMobile = utils.isMobile(),
-        _isIPad = utils.isIPad(),
-        _isIPod = utils.isIPod(),
-        PLAYER_CLASS = 'jwplayer',
-        ASPECT_MODE = 'aspectMode',
-        FULLSCREEN_SELECTOR = '.' + PLAYER_CLASS + '.jwfullscreen',
-        VIEW_MAIN_CONTAINER_CLASS = 'jwmain',
-        VIEW_INSTREAM_CONTAINER_CLASS = 'jwinstream',
-        VIEW_VIDEO_CONTAINER_CLASS = 'jwvideo',
-        VIEW_CONTROLS_CONTAINER_CLASS = 'jwcontrols',
-        VIEW_ASPECT_CONTAINER_CLASS = 'jwaspect',
-        VIEW_PLAYLIST_CONTAINER_CLASS = 'jwplaylistcontainer',
-        DOCUMENT_FULLSCREEN_EVENTS = [
-            'fullscreenchange',
-            'webkitfullscreenchange',
-            'mozfullscreenchange',
-            'MSFullscreenChange'
-        ],
-
-        /*************************************************************
-         * Player stylesheets - done once on script initialization;  *
-         * These CSS rules are used for all JW Player instances      *
-         *************************************************************/
-        JW_CSS_SMOOTH_EASE = 'opacity .25s ease',
-        JW_CSS_100PCT = '100%',
-        JW_CSS_ABSOLUTE = 'absolute',
-        JW_CSS_IMPORTANT = ' !important',
-        JW_CSS_HIDDEN = 'hidden',
-        JW_CSS_NONE = 'none',
-        JW_CSS_BLOCK = 'block';
-
-    html5.view = function(_api, _model) {
-        var _playerElement,
-            _container,
-            _controlsLayer,
-            _aspectLayer,
-            _playlistLayer,
-            _controlsTimeout = -1,
-            _timeoutDuration = _isMobile ? 4000 : 2000,
-            _videoLayer,
-            _lastWidth,
-            _lastHeight,
-            _instreamLayer,
-            _instreamControlbar,
-            _instreamDisplay,
-            _instreamModel,
-            _instreamMode = false,
-            _controlbar,
-            _display,
-            _castDisplay,
-            _dock,
-            _logo,
-            _logoConfig = utils.extend({}, _model.componentConfig('logo')),
-            _captions,
-            _playlist,
-            _audioMode,
-            _errorState = false,
-            _showing = false,
-            _forcedControlsState = null,
-            _replayState,
-            _rightClickMenu,
-            _resizeMediaTimeout = -1,
-            _inCB = false, // in control bar
-            _currentState,
-
-            // view fullscreen methods and ability
-            _requestFullscreen,
-            _exitFullscreen,
-            _elementSupportsFullscreen = false,
-
-            // Used to differentiate tab focus events from click events, because when
-            //  it is a click, the mouseDown event will occur immediately prior
-            _focusFromClick = false,
-
-            _this = utils.extend(this, new events.eventdispatcher());
-
-        function _init() {
-
-            _playerElement = _createElement('div', PLAYER_CLASS + ' playlist-' + _model.playlistposition);
-            _playerElement.id = _api.id;
-            _playerElement.tabIndex = 0;
-
-            _requestFullscreen =
-                _playerElement.requestFullscreen ||
-                _playerElement.webkitRequestFullscreen ||
-                _playerElement.webkitRequestFullScreen ||
-                _playerElement.mozRequestFullScreen ||
-                _playerElement.msRequestFullscreen;
-            _exitFullscreen =
-                document.exitFullscreen ||
-                document.webkitExitFullscreen ||
-                document.webkitCancelFullScreen ||
-                document.mozCancelFullScreen ||
-                document.msExitFullscreen;
-            _elementSupportsFullscreen = _requestFullscreen && _exitFullscreen;
-
-            if (_model.aspectratio) {
-                _css.style(_playerElement, {
-                    display: 'inline-block'
-                });
-                _playerElement.className = _playerElement.className.replace(PLAYER_CLASS,
-                    PLAYER_CLASS + ' ' + ASPECT_MODE);
+	var slicease = window.slicease,
+		utils = slicease.utils,
+		events = slicease.events,
+		renderMode = events.renderMode,
+		states = events.state,
+		embed = slicease.embed,
+		core = slicease.core,
+		render = core.render,
+		component = core.component,
+		skins = slicease.skins,
+		css = utils.css,
+		
+		SLICER_CLASS = 'sewrap',
+		ASPECT_MODE = 'aspect',
+		MENU_CONTAINER_CLASS = 'semenu',
+		VIEW_CONTAINER_CLASS = 'semain',
+		VIEW_IMAGES_CONTAINER_CLASS = 'seimages',
+		VIEW_CONTROLS_CONTAINER_CLASS = 'secontrols',
+		
+		VIEW_CONTROLS_PAGER_CONTAINER_CLASS = 'sepager',
+		
+		// For all api instances
+		SE_CSS_SMOOTH_EASE = 'opacity .25s ease',
+		SE_CSS_100PCT = '100%',
+		SE_CSS_ABSOLUTE = 'absolute',
+		SE_CSS_IMPORTANT = ' !important',
+		SE_CSS_HIDDEN = 'hidden',
+		SE_CSS_NONE = 'none',
+		SE_CSS_BLOCK = 'block';
+	
+	core.view = function(slicer, model) {
+		var _this = utils.extend(this, new events.eventdispatcher());
+			_slicerWrapper,
+			_menuLayer,
+			_rightClickMenu,
+			_container,
+			_imagesLayer,
+			_render,
+			_controlsLayer,
+			_display,
+			_pager,
+			_errorState = false,
+			_skin;
+		
+		function _init() {
+			_slicerWrapper = _createElement('div', SLICER_CLASS);
+			_slicerWrapper.id = slicer.id;
+			_slicerWrapper.tabIndex = 0;
+			
+			if (model.aspectratio) {
+				css.style(_slicerWrapper, {
+					display: 'inline-block'
+				});
+				_slicerWrapper.className = _slicerWrapper.className.replace(SLICER_CLASS, SLICER_CLASS + ' ' + ASPECT_MODE);
             }
-
-            _resize(_model.width, _model.height);
-
-            var replace = document.getElementById(_api.id);
-            replace.parentNode.replaceChild(_playerElement, replace);
-        }
-
-        function adjustSeek(amount) {
-            var newSeek = utils.between(_model.position + amount, 0, this.getDuration());
-            this.seek(newSeek);
-        }
-
-        function adjustVolume(amount) {
-            var newVol = utils.between(this.getVolume() + amount, 0, 100);
-            this.setVolume(newVol);
-        }
-
-        function allowKeyHandling(evt) {
-            // If Meta keys return
-            if (evt.ctrlKey || evt.metaKey) {
-                return false;
-            }
-
-            // Controls may be disabled during share screens, or via API
-            if (!_model.controls) {
-                return false;
-            }
-            return true;
-        }
-
-        function handleKeydown(evt) {
-            if (!allowKeyHandling(evt)) {
-                // Let event bubble upwards
-                return true;
-            }
-
-            // On keypress show the controlbar for a few seconds
-            if (!_controlbar.adMode()) {
-                _showControlbar();
-                _resetTapTimer();
-            }
-
-            var jw = jwplayer(_api.id);
-            switch (evt.keyCode) {
-                case 27: // Esc
-                    jw.setFullscreen(false);
-                    break;
-                case 13: // enter
-                case 32: // space
-                    jw.play();
-                    break;
-                case 37: // left-arrow, if not adMode
-                    if (!_controlbar.adMode()) {
-                        adjustSeek.call(jw, -5);
-                    }
-                    break;
-                case 39: // right-arrow, if not adMode
-                    if (!_controlbar.adMode()) {
-                        adjustSeek.call(jw, 5);
-                    }
-                    break;
-                case 38: // up-arrow
-                    adjustVolume.call(jw, 10);
-                    break;
-                case 40: // down-arrow
-                    adjustVolume.call(jw, -10);
-                    break;
-                case 77: // m-key
-                    jw.setMute();
-                    break;
-                case 70: // f-key
-                    jw.setFullscreen();
-                    break;
-                default:
-                    if (evt.keyCode >= 48 && evt.keyCode <= 59) {
-                        // if 0-9 number key, move to n/10 of the percentage of the video
-                        var number = evt.keyCode - 48;
-                        var newSeek = (number / 10) * jw.getDuration();
-                        jw.seek(newSeek);
-                    }
-                    break;
-            }
-
-            if (/13|32|37|38|39|40/.test(evt.keyCode)) {
-                // Prevent keypresses from scrolling the screen
-                evt.preventDefault();
-                return false;
-            }
-        }
-
-        function handleMouseDown() {
-            _focusFromClick = true;
-
-            // After a click it no longer has 'tab-focus'
-            _this.sendEvent(events.JWPLAYER_VIEW_TAB_FOCUS, {
-                hasFocus: false
-            });
-        }
-
-        function handleFocus() {
-            var wasTabEvent = !_focusFromClick;
-            _focusFromClick = false;
-
-            if (wasTabEvent) {
-                _this.sendEvent(events.JWPLAYER_VIEW_TAB_FOCUS, {
-                    hasFocus: true
-                });
-            }
-
-            // On tab-focus, show the control bar for a few seconds
-            if (!_controlbar.adMode()) {
-                _showControlbar();
-                _resetTapTimer();
-            }
-        }
-
-        function handleBlur() {
-            _focusFromClick = false;
-            _this.sendEvent(events.JWPLAYER_VIEW_TAB_FOCUS, {
-                hasFocus: false
-            });
-        }
-
-        this.getCurrentCaptions = function() {
-            return _captions.getCurrentCaptions();
-        };
-
-        this.setCurrentCaptions = function(caption) {
-            _captions.setCurrentCaptions(caption);
-        };
-
-        this.getCaptionsList = function() {
-            return _captions.getCaptionsList();
-        };
-
-        function _responsiveListener() {
-            var bounds = _bounds(_playerElement),
-                containerWidth = Math.round(bounds.width),
-                containerHeight = Math.round(bounds.height);
-            if (!document.body.contains(_playerElement)) {
-                window.removeEventListener('resize', _responsiveListener);
-                if (_isMobile) {
-                    window.removeEventListener('orientationchange', _responsiveListener);
-                }
-            } else if (containerWidth && containerHeight) {
-                if (containerWidth !== _lastWidth || containerHeight !== _lastHeight) {
-                    _lastWidth = containerWidth;
-                    _lastHeight = containerHeight;
-                    if (_display) {
-                        _display.redraw();
-                    }
-                    clearTimeout(_resizeMediaTimeout);
-                    _resizeMediaTimeout = setTimeout(_resizeMedia, 50);
-                    _this.sendEvent(events.JWPLAYER_RESIZE, {
-                        width: containerWidth,
-                        height: containerHeight
-                    });
-                }
-            }
-            return bounds;
-        }
-
-
-        this.setup = function(skin) {
-            if (_errorState) {
-                return;
-            }
-            _api.skin = skin;
-
-            _container = _createElement('span', VIEW_MAIN_CONTAINER_CLASS);
-            _container.id = _api.id + '_view';
-            _videoLayer = _createElement('span', VIEW_VIDEO_CONTAINER_CLASS);
-            _videoLayer.id = _api.id + '_media';
-
-            _controlsLayer = _createElement('span', VIEW_CONTROLS_CONTAINER_CLASS);
-            _instreamLayer = _createElement('span', VIEW_INSTREAM_CONTAINER_CLASS);
-            _playlistLayer = _createElement('span', VIEW_PLAYLIST_CONTAINER_CLASS);
-            _aspectLayer = _createElement('span', VIEW_ASPECT_CONTAINER_CLASS);
-
-            _setupControls();
-
+			
+			_resize(model.width, model.height);
+			
+			var replace = document.getElementById(slicer.id);
+			replace.parentNode.replaceChild(_slicerWrapper, replace);
+		}
+		
+		_this.setup = function() {
+			slicer.skin = _skin = new skins[model.skin]();
+			switch (_skin.type) {
+				case 'svg':
+					var tag = _skin.element();
+					tag.style.display = SE_CSS_NONE;
+					_slicerWrapper.appendChild(tag);
+					break;
+				default:
+					_this.dispatchEvent(events.SLICEASE_SETUP_ERROR, { message: 'Unknown skin type.' });
+					break;
+			}
+			
+			_menuLayer = _createElement('div', MENU_CONTAINER_CLASS);
+			_menuLayer.id = slicer.id + '_menu';
+			_container = _createElement('span', VIEW_CONTAINER_CLASS);
+			_container.id = slicer.id + '_view';
+			
+			_imagesLayer = _createElement('span', VIEW_IMAGES_CONTAINER_CLASS);
+			_imagesLayer.id = slicer.id + '_images';
+			_setupRender();
+			
+			_controlsLayer = _createElement('span', VIEW_CONTROLS_CONTAINER_CLASS);
+			_controlsLayer.id = slicer.id + '_controls';
+			_setupControls();
+			
+			_container.appendChild(_imagesLayer);
+			_container.appendChild(_controlsLayer);
+			
+			_slicerWrapper.appendChild(_menuLayer);
+			_slicerWrapper.appendChild(_container);
+			
             _container.appendChild(_videoLayer);
             _container.appendChild(_controlsLayer);
             _container.appendChild(_instreamLayer);
@@ -436,7 +239,81 @@
                 _resize(_model.width, _model.height);
             }, 0);
         };
-                
+        
+        function _setupRender() {
+        	switch (model.renderMode) {
+        		case renderMode.CANVAS:
+        			_render = new render.canvas(slicer);
+        			
+        			break;
+        		case renderMode.SPARE:
+        			
+        			break;
+        		default:
+        			_this.dispatchEvent(events.SLICEASE_SETUP_ERROR, { message: 'Unknown render mode.' });
+        			break;
+        	}
+        	
+        	if (_render) {
+        		_imagesLayer.appendChild(_render.element());
+        	}
+        }
+        
+        function _setupControls() {
+        	var height = model.height,
+        		displaySettings = model.getConfig('display'),
+        		pagerSettings = model.getConfig('pager');
+			
+			_display = new component.display(slicer, displaySettings);
+			_controlsLayer.appendChild(_display.element());
+			
+			_pager = new component.pager(slicer, pagerSettings);
+			_controlsLayer.appendChild(_pager.element());
+			
+			_slicerWrapper.addEventListener('keydown', _onKeyDown);
+        }
+        
+        function _forward(e) {
+        	_this.dispatchEvent(e.type, e);
+        }
+		
+		function _onKeyDown(e) {
+			if (!model.controls || e.ctrlKey || e.metaKey) {
+				return true;
+			}
+			
+			var se = slicease(slicer.id);
+			switch (evt.keyCode) {
+				case 13: // enter
+				case 32: // space
+					se.play();
+					break;
+				case 37: // left-arrow
+				case 38: // up-arrow
+					se.prev();
+					break;
+				case 39: // right-arrow
+				case 40: // down-arrow
+					se.next();
+					break;
+				default:
+					break;
+			}
+			
+			if (/13|32|37|38|39|40/.test(e.keyCode)) {
+				// Prevent keypresses from scrolling the screen
+				e.preventDefault();
+				return false;
+			}
+		}
+		
+		function handleMouseDown() {
+			_this.sendEvent(events.SLICEASE_ITEM_CLICK, { index: index });
+		}
+		
+		
+		
+		
         function _componentFadeListeners(comp) {
             if (comp) {
                 comp.element().addEventListener('mousemove', _cancelFade, false);
@@ -455,14 +332,6 @@
         function _mouseoutHandler() {
             clearTimeout(_controlsTimeout);
             _controlsTimeout = setTimeout(_hideControls, _timeoutDuration);
-        }
-
-        function _createElement(elem, className) {
-            var newElement = document.createElement(elem);
-            if (className) {
-                newElement.className = className;
-            }
-            return newElement;
         }
 
         function _touchHandler() {
@@ -514,69 +383,7 @@
             _this.sendEvent(evt.type, evt);
         }
 
-        function _setupControls() {
-            var height = _model.height,
-                cbSettings = _model.componentConfig('controlbar'),
-                displaySettings = _model.componentConfig('display');
-
-            _checkAudioMode(height);
-
-            _captions = new html5.captions(_api, _model.captions);
-            _captions.addEventListener(events.JWPLAYER_CAPTIONS_LIST, forward);
-            _captions.addEventListener(events.JWPLAYER_CAPTIONS_CHANGED, forward);
-            _captions.addEventListener(events.JWPLAYER_CAPTIONS_LOADED, _captionsLoadedHandler);
-            _controlsLayer.appendChild(_captions.element());
-
-            _display = new html5.display(_api, displaySettings);
-            _display.addEventListener(events.JWPLAYER_DISPLAY_CLICK, function(evt) {
-                forward(evt);
-                _touchHandler();
-            });
-
-            if (_audioMode) {
-                _display.hidePreview(true);
-            }
-            _controlsLayer.appendChild(_display.element());
-
-            _logo = new html5.logo(_api, _logoConfig);
-            _controlsLayer.appendChild(_logo.element());
-
-            _dock = new html5.dock(_api, _model.componentConfig('dock'));
-            _controlsLayer.appendChild(_dock.element());
-
-            if (_api.edition && !_isMobile) {
-                _rightClickMenu = new html5.rightclick(_api, {
-                    abouttext: _model.abouttext,
-                    aboutlink: _model.aboutlink
-                });
-            } else if (!_isMobile) {
-                _rightClickMenu = new html5.rightclick(_api, {});
-            }
-
-            if (_model.playlistsize && _model.playlistposition && _model.playlistposition !== JW_CSS_NONE) {
-                _playlist = new html5.playlistcomponent(_api, {});
-                _playlistLayer.appendChild(_playlist.element());
-            }
-
-            _controlbar = new html5.controlbar(_api, cbSettings);
-            _controlbar.addEventListener(events.JWPLAYER_USER_ACTION, _resetTapTimer);
-
-            _controlsLayer.appendChild(_controlbar.element());
-
-            if (_isIPod) {
-                _hideControlbar();
-            }
-            if (utils.canCast()) {
-                _this.forceControls(true);
-            }
-            
-            _playerElement.onmousedown = handleMouseDown;
-            _playerElement.onfocusin = handleFocus;
-            _playerElement.addEventListener('focus', handleFocus);
-            _playerElement.onfocusout = handleBlur;
-            _playerElement.addEventListener('blur', handleBlur);
-            _playerElement.addEventListener('keydown', handleKeydown);
-        }
+        
 
         function _castAdChanged(evt) {
             // end ad mode (ad provider removed)
@@ -1335,8 +1142,8 @@
                 this.destroyInstream();
             }
         };
-
-        _init();
+		
+		_init();
     };
 
     // Container styles

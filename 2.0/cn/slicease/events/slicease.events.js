@@ -21,6 +21,14 @@
         state: {
             IDLE: 'IDLE',
             PLAYING: 'PLAYING'
-        }
+        },
+        
+        // Item Events
+        SLICEASE_ITEM: 'sliceaseItem',
+        SLICEASE_ITEM_CLICK: 'sliceaseItemClick',
+        
+        // Mouse Events
+        SLICEASE_MOUSE_OVER: 'sliceaseMouseOver',
+        SLICEASE_MOUSE_OUT: 'sliceaseMouseOut'
     };
 })(slicease);

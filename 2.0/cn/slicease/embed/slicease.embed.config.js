@@ -6,10 +6,10 @@
 	
 	embed.config = function(config) {
 		var _defaults = {
-			renderMode: renderMode.CANVAS,
-			fallback: true,
 			width: 480,
 			height: 270,
+			renderMode: renderMode.CANVAS,
+			fallback: true,
 			aspectratio: ''
 		},
 		_config = utils.extend({}, _defaults, config);

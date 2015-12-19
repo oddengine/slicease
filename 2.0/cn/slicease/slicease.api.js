@@ -43,6 +43,10 @@
 		_this.setSlicer = function(slicer, renderMode) {
 			_slicer = slicer;
 			_this.renderMode = renderMode;
+			
+			_this.play = _slicer.play;
+			_this.prev = _slicer.prev;
+			_this.next = _slicer.next;
         };
         
         _this.resize = function(width, height) {
