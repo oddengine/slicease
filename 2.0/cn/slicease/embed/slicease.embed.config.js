@@ -6,9 +6,15 @@
 	
 	embed.config = function(config) {
 		var _defaults = {
+			sources: [],
 			width: 480,
 			height: 270,
-			renderMode: renderMode.CANVAS,
+	 		controls: true,
+	 		skin: 'default',
+	 		display: {},
+	 		pager: {},
+	 		interval: 3500,
+	 		renderMode: renderMode.CANVAS,
 			fallback: true,
 			aspectratio: ''
 		},

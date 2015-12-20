@@ -23,6 +23,7 @@
 	components.pager = function(slicer, config) {
 		var _this = utils.extend(this, new events.eventdispatcher()),
 			_pager,
+			_span,
 			_defaults = {
 				btnStyle: {
 					width: '40px',
@@ -37,8 +38,8 @@
 			_pager = utils.createElement('div', PAGER_CONTAINER_CLASS);
 			_pager.id = slicer.id + '_pager';
 			
-			var pagesContainer = utils.createElement('span');
-				pages = slicer.model.sources.length;
+			 _span = utils.createElement('span');
+			var pages = slicer.model.sources.length;
 			for (var i = 0; i < pages; i++) {
 				var a = utils.createElement('a');
 				a.innerHTML = i + 1;
@@ -47,13 +48,25 @@
 						_this.dispatchEvent(events.SLICEASE_STATE, { state: states.PLAYING, item: n });
 					};
 				})(i));
-				pagesContainer.appendChild(a);
+				_span.appendChild(a);
 			}
-			_pager.appendChild(pagesContainer);
+			_pager.appendChild(_span);
 		}
 		
-		_this.setActive = function(index) {
+		_this.setActive = function(item) {
+			if (_span === undefined || _span === null) {
+				return;
+			}
+			if (item < 0 || item >= _span.childNodes.length) {
+				return;
+			}
 			
+			for (var i = 0; i < _span.childNodes.length; i++) {
+				_span.childNodes[i].className = (i === item ? 'active' : '');
+			}
+			
+			// For testing
+			//_this.dispatchEvent(events.SLICEASE_STATE, { state: states.IDLE, item: item });
 		};
 		
 		_this.hide = function(immediate) {

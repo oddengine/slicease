@@ -111,3 +111,7 @@ body {
 	cursor: pointer;
 	background: #900;
 }
+
+.sepager a.active {
+	background: #ccc;
+}

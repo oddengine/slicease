@@ -41,15 +41,15 @@
 			}
 			
 			utils.foreach(rules, function(style, value) {
-				var styleName = attrName(style);
-				if (element.style[styleName] !== value) {
-					element.style[styleName] = value;
+				var name = getStyleName(style);
+				if (element.style[name] !== value) {
+					element.style[name] = value;
 				}
 			});
 		}
 	};
 	
-	function attrName(name) {
+	function getStyleName(name) {
 		name = name.split('-');
 		for (var i = 1; i < name.length; i++) {
 			name[i] = name[i].charAt(0).toUpperCase() + name[i].slice(1);
