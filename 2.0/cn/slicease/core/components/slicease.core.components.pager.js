@@ -37,17 +37,19 @@
 			_pager = utils.createElement('div', PAGER_CONTAINER_CLASS);
 			_pager.id = slicer.id + '_pager';
 			
-			var i = 0, pages = slicer.model.sources.length;
-			for (; i < pages; i++) {
+			var pagesContainer = utils.createElement('span');
+				pages = slicer.model.sources.length;
+			for (var i = 0; i < pages; i++) {
 				var a = utils.createElement('a');
-				a.innerText = i + 1;
+				a.innerHTML = i + 1;
 				a.addEventListener('click', (function(n) {
 					return function(e) {
-						_this.dispatchEvent(events.SLICEASE_STATE, { state: states.PLAYING, item: i });
+						_this.dispatchEvent(events.SLICEASE_STATE, { state: states.PLAYING, item: n });
 					};
 				})(i));
-				_pager.appendChild(a);
+				pagesContainer.appendChild(a);
 			}
+			_pager.appendChild(pagesContainer);
 		}
 		
 		_this.setActive = function(index) {

@@ -16,21 +16,27 @@
 		return obj;
 	};
 	
-	utils.deepExtend = function(obj, chi) {
-		switch (utils.typeOf(chi)) {
-			case 'object':
-				if (obj === undefined || obj === null) {
-					obj = {};
+	utils.deepExtend = function() {
+		var args = Array.prototype.slice.call(arguments, 0),
+			obj = args[0];
+		if (args.length > 1) {
+			for (var i = 1; i < args.length; i++) {
+				switch (utils.typeOf(args[i])) {
+					case 'object':
+						if (obj === undefined || obj === null) {
+							obj = {};
+						}
+						utils.foreach(args[i], function(k, v) {
+							obj[k] = utils.deepExtend(obj[k], args[i][k]);
+						});
+						break;
+					case 'array':
+						obj = utils.clone(args[i]);
+						break;
+					default:
+						obj = args[i];
 				}
-				utils.foreach(chi, function(k, v) {
-					obj[k] = utils.deepExtend(obj[k], chi[k]);
-				});
-				break;
-			case 'array':
-				obj = utils.clone(chi);
-				break;
-			default:
-				obj = chi;
+			}
 		}
 		return obj;
 	};
@@ -148,7 +154,7 @@
 		if (typeof console.log === 'object') {
 			console.log(args);
 		} else {
-			//console.log.apply(console, args);
+			console.log.apply(console, args);
 		}
 	};
 	

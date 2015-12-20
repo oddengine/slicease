@@ -9,7 +9,6 @@
 			_width = _config.width,
 			_height = _config.height,
 			_errorOccurred = false,
-			_errorText = 'Error embedding slicer: ',
 			_embedder = null;
 		
 		_config.id = api.id;
@@ -42,7 +41,7 @@
 					_config.renderMode = configClone.renderMode = renderMode.SPARE;
 					_embedder = new embed.spare(api, configClone);
 				} else {
-					_errorScreen(_errorText + 'No suitable render found');
+					_errorScreen('No suitable render found.');
 					return;
 				}
 			}
