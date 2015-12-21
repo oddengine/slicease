@@ -10,8 +10,8 @@
 			_canvas,
 			_defaults = {
 				pieces: [7],
-		 		delays: function(i, n) {
-		 			return i * 200;
+		 		delays: function(item, total, reverse) {
+		 			return (reverse ? total - item - 1 : item) * 200;
 		 		},
 		 		padding: '50px 40px 70px',
 		 		sightDistance: 800,
@@ -27,7 +27,11 @@
 		 			'iteration-count': 1,
 		 			direction: 'normal'
 		 		},
-		 		animation: {
+		 		animation: [{
+		 			properties: {
+		 				angleX: { '0%': 0, '100%': 90 },
+		 				z: { '0%': 0, '100%': 90 }
+		 			},
 		 			keyframes: {
 		 				'from': { angle: 45, z: 800 },
 		 				'to': { angle: 90, z: 0 }
@@ -37,7 +41,7 @@
 		 			delay: 0,
 		 			'iteration-count': 1,
 		 			direction: 'normal'
-		 		},
+		 		}],
 		 		fps: 24,
 		 		strokeStyle: 'rgb(0,0,250)',
 		 		sideColor: '#999999'

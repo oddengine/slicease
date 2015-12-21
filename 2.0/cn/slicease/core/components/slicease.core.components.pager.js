@@ -66,7 +66,7 @@
 			}
 			
 			// For testing
-			//_this.dispatchEvent(events.SLICEASE_STATE, { state: states.IDLE, item: item });
+			_this.dispatchEvent(events.SLICEASE_STATE, { state: states.IDLE, item: item });
 		};
 		
 		_this.hide = function(immediate) {

@@ -4,6 +4,7 @@
 	slicease.skins.default = function() {
 		var _this = this,
 			_skin,
+			_svg,
 			_svgAttr = {
 				id: 'seskin_default',
 				version: '1.1',
@@ -31,14 +32,17 @@
 		
 		function _init() {
 			_this.type = 'svg';
-			_skin = document.createElement('svg');
-			_addAttr(_skin, _svgAttr);
+			
+			_skin = document.createElement('div');
+			_svg = document.createElement('svg');
+			_addAttr(_svg, _svgAttr);
 			
 			for (var i = 0; i < _paths.length; i++) {
 				var _path = document.createElement('path');
 				_addAttr(_path, _paths[i]);
-				_skin.appendChild(_path);
+				_svg.appendChild(_path);
 			}
+			_skin.appendChild(_svg);
 		}
 		
 		function _addAttr(tag, attrs) {
