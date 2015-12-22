@@ -1,7 +1,8 @@
 (function(slicease) {
-	var utils = slicease.utils;
+	var utils = slicease.utils,
+		skins = slicease.skins;
 	
-	slicease.skins.default = function() {
+	skins.default = function() {
 		var _this = this,
 			_skin,
 			_svg,

@@ -15,7 +15,8 @@
 		 		},
 		 		padding: '50px 40px 70px',
 		 		sightDistance: 800,
-		 		easeInAnimation: {
+		 		objectDistance: 400,
+		 		openingAnimation: {
 		 			keyframes: {
 		 				'0%': { angle: 45, z: 800, alpha: 0 },
 		 				'80%': { angle: 90 },
@@ -28,12 +29,8 @@
 		 			direction: 'normal'
 		 		},
 		 		animation: [{
-		 			properties: {
-		 				angleX: { '0%': 0, '100%': 90 },
-		 				z: { '0%': 0, '100%': 90 }
-		 			},
 		 			keyframes: {
-		 				'from': { angle: 45, z: 800 },
+		 				'from': { angle: 0, z: 800 },
 		 				'to': { angle: 90, z: 0 }
 		 			},
 		 			duration: 1200,
