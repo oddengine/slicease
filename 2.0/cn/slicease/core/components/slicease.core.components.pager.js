@@ -64,9 +64,6 @@
 			for (var i = 0; i < _span.childNodes.length; i++) {
 				_span.childNodes[i].className = (i === item ? 'active' : '');
 			}
-			
-			// For testing
-			_this.dispatchEvent(events.SLICEASE_STATE, { state: states.IDLE, item: item });
 		};
 		
 		_this.hide = function(immediate) {

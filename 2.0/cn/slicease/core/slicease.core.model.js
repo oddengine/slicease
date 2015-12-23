@@ -26,7 +26,7 @@
 		};
 		
 		_this.getConfig = function(name) {
-			return _this.config[name];
+			return _this.config[name] || {};
 		};
 		
 		_this.destroy = function() {
