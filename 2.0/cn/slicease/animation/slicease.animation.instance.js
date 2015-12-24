@@ -17,44 +17,26 @@
 	slicease.animation = function(config) {
 		var _this = this,
 			_defaults = {
-				keyframes: {},
 	 			duration: 0,
 	 			'timing-function': timingfunction.EASE,
 	 			delay: 0,
 	 			'iteration-count': 1,
 	 			direction: 'normal'// alternate
 			},
-			_keyframes = [],
 			_points;
 		
 		function _init() {
 			_this.config = utils.deepExtend({}, _defaults, config);
-			_parseConfig();
-			
 			_points = _getPoints();
 		}
 		
-		function _parseConfig() {
-			if (utils.typeOf(_this.config.keyframes) === 'object') {
-				utils.foreach(_this.config.keyframes, function(key, val) {
-					_keyframes.push({
-						percent: (key === 'from' ? 0 : (key === 'to' ? 100 : parseInt(key))) / 100,
-						properties: val
-					});
-				});
-				_keyframes.sort(function(a, b) {
-					return a.percent - b.percent;
-				});
-			}
-		}
-		
-		_this.ease = function(time, oneach) {
+		_this.ease = function(time) {
 			if (!_points || _points.length < 2) {
 				return;
 			}
 			
-			var per = _shrink(_points, _percent(time));
-			
+			var t = _percent(time);
+			return _shrink(_points, t);
 		};
 		
 		function _percent(time) {

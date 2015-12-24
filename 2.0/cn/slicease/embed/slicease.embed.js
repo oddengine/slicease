@@ -29,17 +29,16 @@
 			api.container.style.width = _width.toString().indexOf('%') > 0 ? _width : (_width + 'px');
 			api.container.style.height = _height.toString().indexOf('%') > 0 ? _height : (_height + 'px');
 			
-			var configClone = utils.extend({}, _config);
 			try {
-				_embedder = new embed[_config.renderMode](api, configClone);
+				_embedder = new embed[_config.renderMode](api, _config);
 			} catch (e) {
 				utils.log('Render not found');
 			}
 			
 			if (!_embedder || !_embedder.supports()) {
 				if (_config.fallback) {
-					_config.renderMode = configClone.renderMode = renderMode.SPARE;
-					_embedder = new embed.spare(api, configClone);
+					_config.renderMode = _config.renderMode = renderMode.SPARE;
+					_embedder = new embed.spare(api, _config);
 				} else {
 					_errorScreen('No suitable render found.');
 					return;

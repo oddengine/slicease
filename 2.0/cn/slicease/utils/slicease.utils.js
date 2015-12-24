@@ -23,7 +23,7 @@
 			for (var i = 1; i < args.length; i++) {
 				switch (utils.typeOf(args[i])) {
 					case 'object':
-						if (obj === undefined || obj === null) {
+						if (obj === undefined || obj === null || utils.typeOf(obj) !== 'object') {
 							obj = {};
 						}
 						utils.foreach(args[i], function(k, v) {

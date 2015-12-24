@@ -52,6 +52,9 @@
 					break;
 			}
 			
+			_prev.addEventListener('click', slicer.prev);
+			_next.addEventListener('click', slicer.next);
+			
 			_display.appendChild(_prev);
 			_display.appendChild(_next);
 			

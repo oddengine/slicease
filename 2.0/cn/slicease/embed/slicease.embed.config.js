@@ -11,6 +11,7 @@
 			height: 270,
 	 		controls: true,
 	 		skin: 'default',
+	 		canvas: {},
 	 		display: {},
 	 		pager: {},
 	 		interval: 3500,

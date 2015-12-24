@@ -1,6 +1,5 @@
 (function(slicease) {
 	var utils = slicease.utils,
-		events = slicease.events,
 		core = slicease.core,
 		renders = core.renders;
 	

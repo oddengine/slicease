@@ -59,6 +59,7 @@
 		}
 		
 		function _viewStateHandler(e) {
+			_this.interrupt();
 			model.setState(e.state, e.item);
 		};
 		

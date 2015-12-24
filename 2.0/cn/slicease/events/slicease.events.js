@@ -24,6 +24,10 @@
 		},
 		
 		// Item Events
-		SLICEASE_ITEM_CLICK: 'sliceaseItemClick'
+		SLICEASE_ITEM_CLICK: 'sliceaseItemClick',
+		
+		// Timer Events
+		SLICEASE_TIMER: 'sliceaseTimer',
+		SLICEASE_TIMER_COMPLETE: 'sliceaseTimerComplete'
 	};
 })(slicease);
