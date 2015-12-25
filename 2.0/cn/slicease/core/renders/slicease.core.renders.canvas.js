@@ -12,9 +12,9 @@
 	
 	var cuboid = function(width, height, origin) {
 		var _this = this,
-			_origin,
 			_width,
 			_height,
+			_origin,
 			_points = [];
 		
 		function _init() {
@@ -31,7 +31,50 @@
 			_points.push(_this.b1 = p(_this.b0.x * -1, _this.b0.y, -_this.b0.z));
 			_points.push(_this.c1 = p(_this.c0.x * -1, _this.c0.y, -_this.c0.z));
 			_points.push(_this.d1 = p(_this.d0.x * -1, _this.d0.y, -_this.d0.z));
+			
+			_this.points = _points;
 		}
+		
+		_this.rotateX = function(alpha) {
+			for (var i = 0; i < _points.length; i++) {
+				var point = _points[i];
+				var y = point.y * Math.cos(alpha) - point.z * Math.sin(alpha);
+				var z = point.y * Math.sin(alpha) + point.z * Math.cos(alpha);
+				point.y = y;
+				point.z = z;
+			}
+		};
+		
+		_this.rotateY = function(alpha) {
+			for (var i = 0; i < _points.length; i++) {
+				var point = _points[i];
+				var x = point.z * Math.sin(alpha) + point.x * Math.cos(alpha);
+				var z = point.z * Math.cos(alpha) - point.x * Math.sin(alpha);
+				point.x = x;
+				point.z = z;
+			}
+		};
+		
+		_this.rotateZ = function(alpha) {
+			for (var i = 0; i < _points.length; i++) {
+				var point = _points[i];
+				var x = point.x * Math.cos(alpha) - point.y * Math.sin(alpha);
+				var y = point.x * Math.sin(alpha) + point.y * Math.cos(alpha);
+				point.y = y;
+				point.z = z;
+			}
+		};
+		
+		_this.scale = function(ratio) {
+			_this.width *= ratio;
+			_this.height *= ratio;
+			for (var i = 0; i < _points.length; i++) {
+				var point = _points[i];
+				point.x *= ratio;
+				point.y *= ratio;
+				point.z *= ratio;
+			}
+		};
 		
 		_init();
 	};
@@ -48,8 +91,8 @@
 		 		objectDistance: 200,
 		 		startAnimation: {
 		 			keyframes: {
-		 				'0%': { angle: 45, z: 800, alpha: 0 },
-		 				'80%': { angle: 90 },
+		 				'0%': { angleX: 45, z: 800, alpha: 0 },
+		 				'80%': { angleX: 90 },
 		 				'100%': { z: 0, alpha: 100 }
 		 			},
 		 			duration: 600,
@@ -60,8 +103,8 @@
 		 		},
 		 		animation: {
 		 			keyframes: {
-		 				'from': { angle: 0, z: 800 },
-		 				'to': { angle: 90, z: 0 }
+		 				'from': { angleX: 0, z: 0 },
+		 				'to': { angleX: 90, z: 0 }
 		 			},
 		 			duration: 1200,
 		 			'timing-function': 'elastic',
@@ -80,6 +123,7 @@
 			_animations = [],
 			_images = [],
 			_cuboids,
+			_camera,
 			_item = -1,
 			_pieceIndex = -1,
 			_animationIndex = -1,
@@ -115,8 +159,6 @@
 			_cvs.width = _canvas.width;
 			_cvs.height = _canvas.height;
 			_ctx = _cvs.getContext('2d');
-			
-			
 		}
 		
 		function _parseConfig() {
@@ -147,6 +189,7 @@
 				_animations.push(new slicease.animation(_this.config.animation[a]));
 			}
 			
+			_camera = p(0, 0, _this.config.objectDistance + _this.height / 2);
 			_interval = Math.floor(1000 / _this.config.fps);
 		}
 		
@@ -155,19 +198,14 @@
 			_item = item || 0;
 			_reverse = reverse || (prev > _item);
 			
+			_resetCuboids();
+			
 			if (!_timer) {
 				_timer = new utils.timer(_interval);
 				_timer.addEventListener(events.SLICEASE_TIMER, _draw);
 			}
 			_timer.reset();// in case it is drawing, & reset timer.currentCount
-			
-			_resetCuboids();
 			_timer.start();
-			
-			// For testing
-			setTimeout(function() {
-				_this.dispatchEvent(events.SLICEASE_STATE, { state: states.IDLE, item: item });
-			}, 0);
 		};
 		
 		function _draw() {
@@ -179,13 +217,57 @@
 				animation = _animations[_animationIndex];
 			}
 			
-			var currenttime = _timer.currentCount * _interval;
+			var cvs, ctx;
+			cvs = utils.createElement('canvas');
+			cvs.width = _canvas.width;
+			cvs.height = _canvas.height;
+			ctx = cvs.getContext('2d');
+			
+			var currenttime = _timer.currentCount() * _interval;
 			for (var i = 0; i < _cuboids.length; i++) {
-				var time = currenttime - _getCuboidDelay(i);
+				var cub = _cuboids[i],
+					cloned = new cuboid(cub.width, cub.height, utils.clone(cub.origin)),
+					time = currenttime - _getCuboidDelay(i);
 				animation.ease(time, function(p, v) {
-					
+					switch (p) {
+						case 'alpha':
+							ctx.globalAlpha = v / 100;
+							break;
+						case 'angleX':
+							cloned.rotateX(v * Math.PI / 180);
+							break;
+						case 'angleY':
+							cloned.rotateY(v * Math.PI / 180);
+							break;
+						case 'angleZ':
+							cloned.rotateZ(v * Math.PI / 180);
+							break;
+						case 'scale':
+							cloned.scale(v);
+							break;
+						case 'x':
+						case 'y':
+						case 'z':
+							cloned.origin[p] += v;
+							break;
+						default:
+							utils.log('Unknown property ' + p + ', ignored.');
+					}
 				});
+				
+				for (var j = 0; j < cloned.points.length; j++) {
+					var point = cloned.points[j],
+						point = _object2Camera(point, cloned.origin, _camera),
+						point = _picturePoint(point, _this.config.sightDistance);
+					
+				}
+				_drawLines(cloned);
 			}
+			
+			_context.drawImage(_cvs, 0, 0, _cvs.width, _cvs.height, 0, 0, _canvas.width, _canvas.height);
+			
+			_timer.stop();
+			_this.dispatchEvent(events.SLICEASE_STATE, { state: states.IDLE, item: _item });
 		}
 		
 		function _getCuboidDelay(index) {
@@ -214,9 +296,33 @@
 			
 			// (x - sight.x) / (point.x - sight.x) = (y - sight.y) / (point.y - sight.y) = (z - sight.z) / (point.z - sight.z)
 			var sight = p(0, 0, -dist),
-				v = p(point.x - sight.x, point.y - sight.y, point.z - sight.z),
-				delta = (0 - sight.z) / v.z;
-			return p(v.x * delta + sight.x, v.y * delta + sight.y, 0);
+				vector = p(point.x - sight.x, point.y - sight.y, point.z - sight.z),
+				delta = (0 - sight.z) / vector.z;
+			return p(vector.x * delta + sight.x, vector.y * delta + sight.y, 0);
+		}
+		
+		function _drawLines(cub) {
+			_ctx.beginPath();
+			_ctx.strokeStyle = _this.config.strokeStyle;
+			_ctx.moveTo(cub.a0.x, cub.a0.y);
+			_ctx.lineTo(cub.b0.x, cub.b0.y);
+			_ctx.lineTo(cub.c0.x, cub.c0.y);
+			_ctx.lineTo(cub.d0.x, cub.d0.y);
+			_ctx.lineTo(cub.a0.x, cub.a0.y);
+			
+			_ctx.lineTo(cub.a1.x, cub.a1.y);
+			_ctx.lineTo(cub.b1.x, cub.b1.y);
+			_ctx.lineTo(cub.c1.x, cub.c1.y);
+			_ctx.lineTo(cub.d1.x, cub.d1.y);
+			_ctx.lineTo(cub.a1.x, cub.a1.y);
+			_ctx.closePath();
+			
+			_ctx.moveTo(cub.b0.x, cub.b0.y);
+			_ctx.lineTo(cub.b1.x, cub.b1.y);
+			_ctx.moveTo(cub.c0.x, cub.c0.y);
+			_ctx.lineTo(cub.c1.x, cub.c1.y);
+			_ctx.moveTo(cub.d0.x, cub.d0.y);
+			_ctx.lineTo(cub.d1.x, cub.d1.y);
 		}
 		
 		

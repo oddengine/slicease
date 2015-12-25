@@ -26,7 +26,7 @@
 			_currentCount++;
 			_this.dispatchEvent(events.SLICEASE_TIMER);
 			
-			if (_this.repeatCount > 0 && _this._currentCount >= _this.repeatCount) {
+			if (_this.repeatCount > 0 && _currentCount >= _this.repeatCount) {
 				_this.stop();
 				_this.dispatchEvent(events.SLICEASE_TIMER_COMPLETE);
 			}

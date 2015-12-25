@@ -24,28 +24,27 @@
 	 			'iteration-count': 1,
 	 			direction: 'normal'// alternate
 			},
-			_keyframes = [],
 			_points;
 		
 		function _init() {
 			_this.config = utils.deepExtend({}, _defaults, config);
-			_parseConfig();
+			utils.deepExtend(_this, _this.config, {
+				keyframes: (function() {
+					var keyframes = [];
+					utils.foreach(_this.config.keyframes, function(key, val) {
+						keyframes.push({
+							ratio: (key === 'from' ? 0 : (key === 'to' ? 100 : parseInt(key))) / 100,
+							properties: val
+						});
+					});
+					keyframes.sort(function(a, b) {
+						return a.ratio - b.ratio;
+					});
+					return keyframes;
+				})()
+			});
 			
 			_points = _getPoints();
-		}
-		
-		function _parseConfig() {
-			if (utils.typeOf(_this.config.keyframes) === 'object') {
-				utils.foreach(_this.config.keyframes, function(key, val) {
-					_keyframes.push({
-						percent: (key === 'from' ? 0 : (key === 'to' ? 100 : parseInt(key))) / 100,
-						properties: val
-					});
-				});
-				_keyframes.sort(function(a, b) {
-					return a.percent - b.percent;
-				});
-			}
 		}
 		
 		_this.ease = function(time, oneach) {
@@ -53,30 +52,60 @@
 				return;
 			}
 			
-			var per = _shrink(_points, _percent(time));
+			var timeratio = _getTimeRatio(time),
+				valueratio = _bezierShrink(_points, timeratio),
+				properties = {};
+			for (var i = 0; i < _this.keyframes.length; i++) {
+				var keyframe = _this.keyframes[i];
+				utils.foreach(keyframe.properties, function(key, val) {
+					if (properties.hasOwnProperty(key) === false) {
+						properties[key] = { from: val, to: NaN };
+					} else if (keyframe.ratio <= timeratio || properties[key].to === NaN) {
+						if (properties[key].to !== NaN) {
+							properties[key].from = properties[key].to;
+						}
+						properties[key].to = val;
+					}
+				});
+			}
 			
+			utils.foreach(properties, function(k, v) {
+				if (v.to !== NaN && typeof oneach === 'function') {
+					oneach(k, v.from + (v.to - v.from) * valueratio);
+				}
+			});
 		};
 		
-		function _percent(time) {
-			if (_this.config.duration === 0) {
+		function _getTimeRatio(time) {
+			if (_this.duration === 0) {
 				return 1;
 			}
-			if (time <= _this.config.delay) {
+			if (time <= _this.delay) {
 				return 0;
 			}
 			
-			return Math.min((time - _this.config.delay) / _this.config.duration, 1);
+			var actualtime = time - _this.delay;
+			if (actualtime >= _this['iteration-count'] * _this.duration) {
+				return (_this.direction === 'alternate' ? (Math.ceil(actualtime / _this.duration) % 2) : 1);
+			}
+			
+			var ratio = (actualtime % _this.duration) / _this.duration;
+			return _this.direction === 'alternate' && !(Math.ceil(actualtime / _this.duration) % 2) ? 1 - ratio : ratio;
 		}
 		
-		function _shrink(points, percent) {
+		function _bezierShrink(points, ratio) {
+			if (!points || points.length < 2) {
+				return 1;
+			}
+			
 			var shrinked = [];
 			for (var i = 1; i < points.length; i++) {
 				var m = points[i - 1];
 				var n = points[i];
-				shrinked.push(p(m.x + (n.x - m.x) * percent, m.y + (n.y - m.y) * percent));
+				shrinked.push(p(m.x + (n.x - m.x) * ratio, m.y + (n.y - m.y) * ratio));
 			}
 			if (shrinked.length > 1) {
-				_shrink(shrinked, percent);
+				_bezierShrink(shrinked, ratio);
 			} else {
 				return shrinked[0].y;
 			}
@@ -84,7 +113,7 @@
 		
 		function _getPoints() {
 			var points;
-			switch (_this.config['timing-function']) {
+			switch (_this['timing-function']) {
 				case timingfunction.LINEAR:
 					points = [p(0, 0), p(1, 1)];
 					break;
