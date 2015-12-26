@@ -124,8 +124,8 @@
 		 			return (reverse ? pieces - index - 1 : index) * 200;
 		 		},
 		 		padding: '50px 40px 70px',
-		 		sightDistance: 200,
-		 		objectDistance: 200,
+		 		sightDistance: 1200,
+		 		objectDistance: 100,
 		 		startAnimation: {
 		 			keyframes: {
 		 				'0%': { rotateX: 45, z: -800, alpha: 0 },
@@ -141,6 +141,7 @@
 		 		animation: {
 		 			keyframes: {
 		 				'from': { rotateX: 0, z: 0 },
+		 				//'50%': { z: -500 },
 		 				'to': { rotateX: 90, z: 0 }
 		 			},
 		 			duration: 1200,
@@ -189,6 +190,8 @@
 			_canvas.innerHTML = '<a>Canvas not supported!</a>'
 				+ '<a>Please open in a browser listed below:</a>'
 				+ '<a>chrome, firefox, opera, safari</a>';
+			_canvas.width = slicer.model.width;
+			_canvas.height = slicer.model.height;
 			_context = _canvas.getContext('2d');
 			_context.strokeStyle = _this.config.strokeStyle;
 			
@@ -233,9 +236,9 @@
 		_this.play = function(item, reverse) {
 			var prev = _item;
 			_item = item || 0;
-			_reverse = reverse || (prev > _item);
 			
 			_resetCuboids();
+			_reverse = reverse || (prev > _item && (prev !== slicer.model.sources.length - 1 || _item !== 0));
 			
 			if (!_timer) {
 				_timer = new utils.timer(_interval);
@@ -246,7 +249,7 @@
 		};
 		
 		function _draw() {
-			_ctx.width = _ctx.width;// clear
+			_cvs.width = _cvs.width;// clear
 			
 			var animation = _startanimation;
 			if (_loaded || animation === undefined) {
@@ -260,10 +263,14 @@
 			cvs.height = _canvas.height;
 			ctx = cvs.getContext('2d');
 			
-			var currenttime = _timer.currentCount() * _interval;
+			var currenttime = _timer.currentCount() * _interval,
+				maxdelay = 0;
 			for (var i = 0; i < _cuboids.length; i++) {
 				var cub = _cuboids[i],
-					time = currenttime - _getCuboidDelay(i);
+					cubdelay = _getCuboidDelay(i),
+					time = currenttime - cubdelay;
+				maxdelay = Math.max(maxdelay, cubdelay);
+				
 				animation.ease(time, function(k, v) {
 					switch (k) {
 						case 'alpha':
@@ -272,7 +279,7 @@
 						case 'rotateX':
 						case 'rotateY':
 						case 'rotateZ':
-							cub.setProperty(k, v * Math.PI / 180);
+							cub.setProperty(k, (_reverse ? v : 360 - v) * Math.PI / 180);
 							break;
 						case 'scaleX':
 						case 'scaleY':
@@ -301,10 +308,14 @@
 				_drawLines(picPoints);
 			}
 			
+			_canvas.width = _canvas.width;
 			_context.drawImage(_cvs, 0, 0, _cvs.width, _cvs.height, 0, 0, _canvas.width, _canvas.height);
 			
-			_timer.stop();
-			_this.dispatchEvent(events.SLICEASE_STATE, { state: states.IDLE, item: _item });
+			if (currenttime >= maxdelay + animation.delay + animation.duration) {
+				_loaded = true;
+				_timer.stop();
+				_this.dispatchEvent(events.SLICEASE_STATE, { state: states.IDLE, item: _item });
+			}
 		}
 		
 		function _getCuboidDelay(index) {
@@ -335,8 +346,8 @@
 				vector = p(point.x - eye.x, point.y - eye.y, point.z - eye.z),
 				delta = (0 - eye.z) / vector.z,
 				point = p(vector.x * delta + eye.x, vector.y * delta + eye.y, 0);
-			//point.x += _this.config.padding.left + _this.width / 2;
-			//point.y += _this.config.padding.top + _this.height / 2;
+			point.x += _this.config.padding.left + _this.width / 2;
+			point.y += _this.config.padding.top + _this.height / 2;
 			return point;
 		}
 		
@@ -362,6 +373,8 @@
 			_ctx.lineTo(points.c1.x, points.c1.y);
 			_ctx.moveTo(points.d0.x, points.d0.y);
 			_ctx.lineTo(points.d1.x, points.d1.y);
+			
+			_ctx.stroke();
 		}
 		
 		
@@ -373,7 +386,7 @@
 			var wth = Math.floor(_this.width / pieces);
 			for (var i = 0; i < pieces; i++) {
 				if (i === pieces - 1) {
-					wth = _this.width - (pieces - 1) * wth;
+					//wth = _this.width - (pieces - 1) * wth;
 				}
 				_cuboids.push(new cuboid(wth, _this.height, p(wth * (i + 1) - wth / 2 - _this.width / 2, 0, 0)));
 			}

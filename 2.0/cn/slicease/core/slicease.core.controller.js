@@ -21,7 +21,7 @@
 			switch (e.state) {
 				case states.PLAYING:
 					if (view.render) {
-						view.render.play(e.item);
+						view.render.play(e.item, e.reverse);
 					}
 					if (view.pager) {
 						view.pager.setActive(e.item);
@@ -67,7 +67,7 @@
 			_this.dispatchEvent(e.type, e);
 		}
 		
-		_this.play = function(item) {
+		_this.play = function(item, reverse) {
 			if (item === undefined) {
 				return _this.next();
 			}
@@ -76,13 +76,13 @@
 			}
 			
 			_this.interrupt();
-			model.setState(states.PLAYING, item);
+			model.setState(states.PLAYING, item, reverse);
 			return true;
 		};
 		
 		_this.prev = function() {
 			var item = model.item - 1;
-			return _this.play(item < 0 ? model.sources.length - 1 : item);
+			return _this.play(item < 0 ? model.sources.length - 1 : item, true);
 		};
 		
 		_this.next = function() {

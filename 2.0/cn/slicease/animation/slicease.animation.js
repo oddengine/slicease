@@ -60,7 +60,7 @@
 				utils.foreach(keyframe.properties, function(key, val) {
 					if (properties.hasOwnProperty(key) === false) {
 						properties[key] = { from: val, to: null };
-					} else if (keyframe.ratio <= timeratio || properties[key].to === null) {
+					} else if (keyframe.ratio <= timeratio || properties[key].to === null) {//??????????????
 						if (properties[key].to !== null) {
 							properties[key].from = properties[key].to;
 						}

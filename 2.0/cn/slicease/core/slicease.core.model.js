@@ -16,13 +16,13 @@
 			}, _this.config);
 		}
 		
-		_this.setState = function(state, item) {
+		_this.setState = function(state, item, reverse) {
 			if (state === _this.state || item < 0 || item >= _this.sources.length) {
 				return;
 			}
 			_this.state = state;
 			_this.item = item;
-			_this.dispatchEvent(events.SLICEASE_STATE, { state: state, item: item });
+			_this.dispatchEvent(events.SLICEASE_STATE, { state: state, item: item, reverse: reverse });
 		};
 		
 		_this.getConfig = function(name) {
