@@ -59,9 +59,9 @@
 				var keyframe = _this.keyframes[i];
 				utils.foreach(keyframe.properties, function(key, val) {
 					if (properties.hasOwnProperty(key) === false) {
-						properties[key] = { from: val, to: NaN };
-					} else if (keyframe.ratio <= timeratio || properties[key].to === NaN) {
-						if (properties[key].to !== NaN) {
+						properties[key] = { from: val, to: null };
+					} else if (keyframe.ratio <= timeratio || properties[key].to === null) {
+						if (properties[key].to !== null) {
 							properties[key].from = properties[key].to;
 						}
 						properties[key].to = val;
@@ -70,7 +70,7 @@
 			}
 			
 			utils.foreach(properties, function(k, v) {
-				if (v.to !== NaN && typeof oneach === 'function') {
+				if (v.to !== null && typeof oneach === 'function') {
 					oneach(k, v.from + (v.to - v.from) * valueratio);
 				}
 			});

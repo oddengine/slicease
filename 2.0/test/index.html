@@ -63,7 +63,13 @@
 		var sli = slicease('slicer').setup({
 			width: 1200,
 			height: 500,
-			sources: ['1', '2', '3']
+			sources: ['1', '2', '3'],
+			canvas: {
+				pieces: [1],
+				startAnimation: {
+					'timing-function': 'linear'
+				}
+			}
 		});
 	</script>
 </body>
