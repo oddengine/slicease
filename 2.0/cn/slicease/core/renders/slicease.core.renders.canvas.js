@@ -141,7 +141,7 @@
 		 		animation: {
 		 			keyframes: {
 		 				'from': { rotateX: 0, z: 0 },
-		 				//'50%': { z: -500 },
+		 				'80%': { z: -1000 },
 		 				'to': { rotateX: 90, z: 0 }
 		 			},
 		 			duration: 1200,
@@ -289,7 +289,7 @@
 						case 'x':
 						case 'y':
 						case 'z':
-							cub.origin[k] += v;
+							cub.origin[k] = v;
 							break;
 						default:
 							utils.log('Unknown property ' + k + ', ignored.');

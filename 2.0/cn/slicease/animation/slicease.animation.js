@@ -53,24 +53,27 @@
 			}
 			
 			var timeratio = _getTimeRatio(time),
-				valueratio = _bezierShrink(_points, timeratio),
 				properties = {};
 			for (var i = 0; i < _this.keyframes.length; i++) {
 				var keyframe = _this.keyframes[i];
 				utils.foreach(keyframe.properties, function(key, val) {
 					if (properties.hasOwnProperty(key) === false) {
-						properties[key] = { from: val, to: null };
-					} else if (keyframe.ratio <= timeratio || properties[key].to === null) {//??????????????
-						if (properties[key].to !== null) {
-							properties[key].from = properties[key].to;
-						}
+						properties[key] = {};
+					}
+					if (keyframe.ratio < timeratio) {
+						properties[key].from = val;
+						properties[key].to = null;
+						properties[key].fr = keyframe.ratio;
+					} else if (properties[key].to === null) {
 						properties[key].to = val;
+						properties[key].tr = keyframe.ratio;
 					}
 				});
 			}
 			
 			utils.foreach(properties, function(k, v) {
 				if (v.to !== null && typeof oneach === 'function') {
+					var valueratio = _bezierShrink(_points, (timeratio - v.fr) / (v.tr - v.fr));
 					oneach(k, v.from + (v.to - v.from) * valueratio);
 				}
 			});
