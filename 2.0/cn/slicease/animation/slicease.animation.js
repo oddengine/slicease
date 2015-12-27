@@ -60,11 +60,11 @@
 					if (properties.hasOwnProperty(key) === false) {
 						properties[key] = {};
 					}
-					if (keyframe.ratio < timeratio) {
+					if (keyframe.ratio < timeratio || properties[key].from === undefined) {
 						properties[key].from = val;
-						properties[key].to = null;
+						properties[key].to = undefined;
 						properties[key].fr = keyframe.ratio;
-					} else if (properties[key].to === null) {
+					} else if (properties[key].to === undefined) {
 						properties[key].to = val;
 						properties[key].tr = keyframe.ratio;
 					}

@@ -128,7 +128,7 @@
 		 		objectDistance: 100,
 		 		startAnimation: {
 		 			keyframes: {
-		 				'0%': { rotateX: 45, z: -800, alpha: 0 },
+		 				'0%': { rotateX: 45, z: -1000, alpha: 0 },
 		 				'80%': { rotateX: 90 },
 		 				'100%': { z: 0, alpha: 100 }
 		 			},
