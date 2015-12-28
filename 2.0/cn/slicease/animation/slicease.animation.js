@@ -73,7 +73,8 @@
 			
 			utils.foreach(properties, function(k, v) {
 				if (v.to !== null && typeof oneach === 'function') {
-					var valueratio = _bezierShrink(_points, (timeratio - v.fr) / (v.tr - v.fr));
+					var shrinked = _bezierShrink(_points, (timeratio - v.fr) / (v.tr - v.fr)),
+						valueratio = shrinked[0].y;
 					oneach(k, v.from + (v.to - v.from) * valueratio);
 				}
 			});
@@ -108,10 +109,9 @@
 				shrinked.push(p(m.x + (n.x - m.x) * ratio, m.y + (n.y - m.y) * ratio));
 			}
 			if (shrinked.length > 1) {
-				_bezierShrink(shrinked, ratio);
-			} else {
-				return shrinked[0].y;
+				shrinked = _bezierShrink(shrinked, ratio);
 			}
+			return shrinked;
 		}
 		
 		function _getPoints() {

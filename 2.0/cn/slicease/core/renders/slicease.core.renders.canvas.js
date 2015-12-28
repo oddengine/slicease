@@ -141,7 +141,7 @@
 		 		animation: {
 		 			keyframes: {
 		 				'from': { rotateX: 0, z: 0 },
-		 				'80%': { z: -1000 },
+		 				'50%': { z: -1000 },
 		 				'to': { rotateX: 90, z: 0 }
 		 			},
 		 			duration: 1200,
@@ -152,7 +152,7 @@
 		 		},
 		 		fps: 24,
 		 		strokeStyle: 'rgb(0,0,250)',
-		 		sideColor: '#999999'
+		 		sideColor: '#cccccc'
 			},
 			
 			_canvas, _context,
@@ -257,12 +257,6 @@
 				animation = _animations[_animationIndex];
 			}
 			
-			var cvs, ctx;
-			cvs = utils.createElement('canvas');
-			cvs.width = _canvas.width;
-			cvs.height = _canvas.height;
-			ctx = cvs.getContext('2d');
-			
 			var currenttime = _timer.currentCount() * _interval,
 				maxdelay = 0;
 			for (var i = 0; i < _cuboids.length; i++) {
@@ -303,9 +297,10 @@
 					var camPoint = _object2Camera(point, cub.origin, _camera),
 						picPoint;
 					picPoints[name] = picPoint = _picturePoint(camPoint);
-					
 				});
-				_drawLines(picPoints);
+				
+				//_drawLines(picPoints);
+				_drawTexture(picPoints, i, _cuboids.length);
 			}
 			
 			_canvas.width = _canvas.width;
@@ -349,6 +344,119 @@
 			point.x += _this.config.padding.left + _this.width / 2;
 			point.y += _this.config.padding.top + _this.height / 2;
 			return point;
+		}
+		
+		function _drawTexture(points, index, pieces) {
+			var img = _images[_item],
+				swidth = Math.floor(img.width / pieces),
+				sheight = img.height,
+				sx = swidth * index,
+				rightSide = index >= pieces / 2;
+			if (index === pieces - 1) {
+				swidth = img.width - swidth * index;
+			}
+			
+			if (_reverse) {
+				// bottom side
+				if (points.c0.y > points.b0.y) {
+					_drawTriangle(img, sx, 0, swidth, sheight, points.b0, points.c0, rightSide ? points.b1 : null, rightSide ? null : points.c1, !rightSide);
+					_drawTriangle(img, sx, 0, swidth, sheight, rightSide ? null : points.b0, rightSide ? points.c0 : null, points.b1, points.c1, !rightSide);
+				}
+				
+				// front side
+				if (points.b0.y > points.a0.y) {
+					_drawTriangle(img, sx, 0, swidth, sheight, points.a0, points.b0, rightSide ? null : points.a1, rightSide ? points.b1 : null, !rightSide);
+					_drawTriangle(img, sx, 0, swidth, sheight, rightSide ? points.a0 : null, rightSide ? null : points.b0, points.a1, points.b1, !rightSide);
+				}
+			} else {
+				// top side
+				if (points.a0.y > points.d0.y) {
+					_drawTriangle(img, sx, 0, swidth, sheight, points.d0, points.a0, rightSide ? null : points.d1, rightSide ? points.a1 : null, !rightSide);
+					_drawTriangle(img, sx, 0, swidth, sheight, rightSide ? points.d0 : null, rightSide ? null : points.a0, points.d1, points.a1, !rightSide);
+				}
+				
+				// front side
+				if (points.b0.y > points.a0.y) {
+					_drawTriangle(img, sx, 0, swidth, sheight, points.a0, points.b0, rightSide ? points.a1 : null, rightSide ? null : points.b1, !rightSide);
+					_drawTriangle(img, sx, 0, swidth, sheight, rightSide ? null : points.a0, rightSide ? points.b0 : null, points.a1, points.b1, !rightSide);
+				}
+			}
+			
+			if (rightSide) {
+				_fillSide(points.a0, points.b0, points.c0, points.d0);
+			} else {
+				_fillSide(points.a1, points.b1, points.c1, points.d1);
+			}
+		}
+		
+		function _drawTriangle(img, sx, sy, swidth, sheight, a0, b0, a1, b1, sourceOver) {
+			var cvs, ctx;
+			cvs = utils.createElement('canvas');
+			cvs.width = _canvas.width;
+			cvs.height = _canvas.height;
+			ctx = cvs.getContext('2d');
+			
+			var a, b = 0, c, d, e = 0, f = 0,
+				e = a0 === null ? b0.x + a1.x - b1.x : a0.x,
+				f = a0 === null ? a1.y : a0.y;
+			
+			ctx.beginPath();
+			ctx.strokeStyle = _this.config.strokeStyle;
+			if (a0 === null) {
+				ctx.moveTo(b0.x, b0.y);
+				ctx.lineTo(a1.x, a1.y);
+				ctx.lineTo(b1.x, b1.y);
+				
+				a = (b1.x - b0.x) / swidth;
+				c = (b1.x - a1.x) / sheight;
+				d = (b1.y - a1.y) / sheight;
+			} else if (b0 === null) {
+				ctx.moveTo(a0.x, a0.y);
+				ctx.lineTo(a1.x, a1.y);
+				ctx.lineTo(b1.x, b1.y);
+				
+				a = (a1.x - a0.x) / swidth;
+				c = (b1.x - a1.x) / sheight;
+				d = (b1.y - a1.y) / sheight;
+			} else if (a1 === null) {
+				ctx.moveTo(a0.x, a0.y);
+				ctx.lineTo(b0.x, b0.y);
+				ctx.lineTo(b1.x, b1.y);
+				
+				a = (b1.x - b0.x) / swidth;
+				c = (b0.x - a0.x) / sheight;
+				d = (b0.y - a0.y) / sheight;
+			} else if (b1 === null) {
+				ctx.moveTo(a0.x, a0.y);
+				ctx.lineTo(b0.x, b0.y);
+				ctx.lineTo(a1.x, a1.y);
+				
+				a = (a1.x - a0.x) / swidth;
+				c = (b0.x - a0.x) / sheight;
+				d = (b0.y - a0.y) / sheight;
+			}
+			ctx.closePath();
+			//ctx.stroke();
+			ctx.clip();
+			
+			ctx.setTransform(a, b, c, d, e, f);
+			ctx.drawImage(img, sx, sy, swidth, sheight, 0, 0, swidth, sheight);
+			
+			_ctx.globalCompositeOperation = sourceOver ? 'source-over' : 'destination-over';
+			_ctx.drawImage(cvs, 0, 0, cvs.width, cvs.height, 0, 0, _cvs.width, _cvs.height);
+		}
+		
+		function _fillSide(a, b, c, d) {
+			_ctx.globalCompositeOperation = 'destination-over';
+			_ctx.beginPath();
+			_ctx.moveTo(a.x, a.y);
+			_ctx.lineTo(b.x, b.y);
+			_ctx.lineTo(c.x, c.y);
+			_ctx.lineTo(d.x, d.y);
+			_ctx.lineTo(a.x, a.y);
+			_ctx.fillStyle = _this.config.sideColor;
+			_ctx.fill();
+			_ctx.closePath();
 		}
 		
 		function _drawLines(points) {
