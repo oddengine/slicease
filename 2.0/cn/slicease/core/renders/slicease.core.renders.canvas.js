@@ -494,7 +494,7 @@
 			var wth = Math.floor(_this.width / pieces);
 			for (var i = 0; i < pieces; i++) {
 				if (i === pieces - 1) {
-					//wth = _this.width - (pieces - 1) * wth;
+					//wth = _this.width - wth * i;
 				}
 				_cuboids.push(new cuboid(wth, _this.height, p(wth * (i + 1) - wth / 2 - _this.width / 2, 0, 0)));
 			}
