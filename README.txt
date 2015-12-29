@@ -5,39 +5,30 @@ slicease.js
 [source](https://github.com/studease/Slicease)
 [Chinese doc](http://blog.csdn.net/icysky1989/article/details/39624155)
 
-### Description ###
+### About ###
 
-This is a 3D image rotator with animation easing based on Bezier curve, 
-which was planned as the tile of my proposed website. 
+This is a 3D image rotator designed for my personal homepage. 
 
-It is built with html5 canvas and pure javascript, and easy to config. 
+It is built on html5 canvas and wrote in pure javascript. Unlike with the css3 animation, 
+the control points of bezier curve are not limited in the range of 0 to 1, 
+so is the number of the points. It also has a powerful and easy-to-understand configuration.
+
 This project is open-sourced with MIT lisence. Enjoy it wherever you like :)
 
 ### Usage ###
 
-Include the library under the folder of 'js'. You just need a canvas tag in your html file and make your images ready.
-Then, as the index.html does, here we go~
+You just need to name out a container and get your images ready.
+Here's the basic settings you may need:
 
 //script
-var slicease = new Slicease();
-var markfunc = new Func();
-markfunc.setup(markIndex);
-var config = {
-	canvas_id: 'canvas', 
-	images: ['contents/img1.png', 'contents/img2.png', 'contents/img3.png'], 
-	pieces: [8, 10, 11],
-	mark_func: markfunc
-};
-slicease.setup(config);
-slicease.init();
-slicease.play();
+var sli = slicease('slicer').setup({
+	width: 1200,
+	height: 500,
+	sources: ['images/img1.png', 'images/img2.png', 'images/img3.png'],
+	canvas: {
+		pieces: [7, 8, 7, 6]
+	}
+});
 //endscript
 
-The 'pieces' in the config means how many cubes of each image should be separated.
-'mark_func' must be typed with Func, not just a function.
-There are more configurations. You can find them marked with 'Available settings' in the main class named 'Slicease'. 
-Such as 'padding', 'delays', 'duration', etc.
-Which should be noticed is that 'screen_z' must be closer or smaller than 'object_z'.
-
-There are several cfgs named 'easing_xxx', and you can have a look at the Slicease.init function once you want to 
-change the easing params or redefine the easing functions. 
+For more configurations, please search for the variables named '_defaults'.
