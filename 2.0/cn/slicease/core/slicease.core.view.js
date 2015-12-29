@@ -12,13 +12,10 @@
 		css = utils.css,
 		
 		SLICER_CLASS = 'sewrap',
-		ASPECT_MODE = 'aspect',
 		MENU_CONTAINER_CLASS = 'semenu',
 		VIEW_CONTAINER_CLASS = 'semain',
 		VIEW_IMAGES_CONTAINER_CLASS = 'seimages',
 		VIEW_CONTROLS_CONTAINER_CLASS = 'secontrols',
-		
-		VIEW_CONTROLS_PAGER_CONTAINER_CLASS = 'sepager',
 		
 		// For all api instances
 		SE_CSS_SMOOTH_EASE = 'opacity .25s ease',
@@ -48,13 +45,6 @@
 			_slicerWrapper.id = slicer.id;
 			_slicerWrapper.tabIndex = 0;
 			
-			if (model.aspectratio) {
-				css.style(_slicerWrapper, {
-					display: 'inline-block'
-				});
-				_slicerWrapper.className = _slicerWrapper.className.replace(SLICER_CLASS, SLICER_CLASS + ' ' + ASPECT_MODE);
-			}
-			
 			_this.resize(model.width, model.height);
 			
 			var replace = document.getElementById(slicer.id);
@@ -62,18 +52,6 @@
 		}
 		
 		_this.setup = function() {
-			slicer.skin = _skin = new skins[model.skin]();
-			switch (_skin.type) {
-				case 'svg':
-					var tag = _skin.element();
-					tag.style.display = SE_CSS_NONE;
-					_slicerWrapper.appendChild(tag);
-					break;
-				default:
-					_this.dispatchEvent(events.SLICEASE_SETUP_ERROR, { message: 'Unknown skin type.' });
-					break;
-			}
-			
 			_menuLayer = utils.createElement('div', MENU_CONTAINER_CLASS);
 			_menuLayer.id = slicer.id + '_menu';
 			_container = utils.createElement('span', VIEW_CONTAINER_CLASS);
@@ -92,6 +70,11 @@
 			
 			_slicerWrapper.appendChild(_menuLayer);
 			_slicerWrapper.appendChild(_container);
+			
+			css('.' + SLICER_CLASS, {
+				width: model.width + 'px',
+				height: model.height + 'px'
+			});
 			
 			setTimeout(function() {
 				_this.resize(model.width, model.height);
@@ -213,7 +196,30 @@
 		_init();
 	};
 	
-	css(SLICER_CLASS, {
-		
+	css('.' + SLICER_CLASS + ', .' + SLICER_CLASS + ' *', {
+		margin: 0,
+		padding: 0,
+		display: 'block'
+	});
+	
+	css('.' + SLICER_CLASS, {
+		position: 'relative',
+		background: '#585862'
+	});
+	
+	css('.' + MENU_CONTAINER_CLASS + ', .' + VIEW_CONTAINER_CLASS + ', .' + VIEW_IMAGES_CONTAINER_CLASS, {
+		width: '100%',
+		height: '100%'
+	});
+	
+	css('.' + MENU_CONTAINER_CLASS, {
+		display: 'none'
+	});
+	
+	css('.' + VIEW_CONTROLS_CONTAINER_CLASS, {
+		width: '100%',
+		height: '100%',
+		position: 'absolute',
+		top: 0
 	});
 })(window);

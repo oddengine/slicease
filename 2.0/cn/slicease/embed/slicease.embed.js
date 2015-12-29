@@ -10,13 +10,7 @@
 			_height = _config.height,
 			_errorOccurred = false,
 			_embedder = null;
-		
 		_config.id = api.id;
-		if (_config.aspectratio) {
-			api.config.aspectratio = _config.aspectratio;
-		} else {
-			delete api.config.aspectratio;
-		}
 		
 		utils.foreach(_config.events, function(e, cb) {
 			var fn = api[e];

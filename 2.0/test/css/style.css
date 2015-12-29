@@ -1,80 +1,68 @@
-﻿.clearfix:after {
-	content: '\200B';
-	display: block;
-	height: 0;
-	clear: both;
-}
-
-.clearfix {
-	display: block;
-	*zoom: 1;/*IE/7/6*/
-}
-
-.center {
-	margin-left: auto;
-	margin-right: auto;
-}
-
-html, body {
+﻿.sewrap, .sewrap * {
 	margin: 0;
 	padding: 0;
-}
-
-body {
-	background: #585862;
+	display: block;
 }
 
 .sewrap {
-	margin: 0 auto;
-	padding: 0;
 	width: 1200px;
 	height: 500px;
 	position: relative;
-	display: block;
-	background: #999;
+	background: #585862;
 }
 
 .semenu {
-	display: none;
+	width: 100%;
+	height: 100%;
 }
 
 .semain {
-	display: block;
+	width: 100%;
+	height: 100%;
 }
 
 .seimages {
-	display: block;
+	width: 100%;
+	height: 100%;
 }
 
 .secontrols {
-	margin: 0;
-	padding: 0;
-	width: 1200px;
+	width: 100%;
 	height: 380px;
 	position: absolute;
 	top: 50px;
 }
 
 .sedisplay {
-	margin: 0;
-	padding: 0;
 	width: 100%;
 	height: 100%;
+	filter: Alpha(opacity=0);
+	opacity: 0;
+}
+
+.sedisplay:hover {
+	filter: Alpha(opacity=100);
+	opacity: 1;
 }
 
 .seprev, .senext {
 	width: 40px;
 	height: 380px;
-	line-height: 380px;
+	position: relative;
 	cursor: pointer;
-	background: #ccc;
-	filter: Alpha(opacity=50);
-	opacity: 0.5;
+	filter: Alpha(opacity=30);
+	opacity: 0.3;
 }
 
 .seprev:hover, .senext:hover {
-	filter: Alpha(opacity=100);
-	opacity: 1;
+	filter: Alpha(opacity=60);
+	opacity: 0.6;
+}
+
+.seprev svg, .senext svg {
+	margin-top: -20px;
+	position: absolute;
+	top: 50%;
 }
 
 .seprev:hover svg, .senext:hover svg {
@@ -90,28 +78,32 @@ body {
 }
 
 .sepager {
-	margin: 0;
-	padding: 0;
 	width: 100%;
-	height: 20px;
+	height: 24px;
 	position: absolute;
-	top: 410px;
+	bottom: -47px;
 }
 
 .sepager span {
-	text-align:center;
-	display: block;
+	height: 100%;
+	text-align: center;
 }
 
 .sepager a {
-	margin: 0 10px 0 0;
-	padding: 3px 8px;
-	font-size: 13px;
+	margin-left: 10px;
+	width: 24px;
+	height: 24px;
 	border-radius: 12px;
+	display: inline-block;
+	line-height: 24px;
+	font-size: 14px;
+	font-weight: bold;
+	color: #25292c;
 	cursor: pointer;
-	background: #900;
+	overflow: hidden;
+	background: #999;
 }
 
-.sepager a.active {
+.sepager a:hover, .sepager a.active {
 	background: #ccc;
 }

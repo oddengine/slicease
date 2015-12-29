@@ -72,10 +72,14 @@
 			}
 			
 			utils.foreach(properties, function(k, v) {
-				if (v.to !== null && typeof oneach === 'function') {
-					var shrinked = _bezierShrink(_points, (timeratio - v.fr) / (v.tr - v.fr)),
-						valueratio = shrinked[0].y;
-					oneach(k, v.from + (v.to - v.from) * valueratio);
+				if (typeof oneach === 'function') {
+					if (v.to === null) {
+						oneach(k, v.from);
+					} else {
+						var shrinked = _bezierShrink(_points, (timeratio - v.fr) / (v.tr - v.fr)),
+							valueratio = shrinked[0].y;
+						oneach(k, v.from + (v.to - v.from) * valueratio);
+					}
 				}
 			});
 		};

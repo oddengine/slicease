@@ -1,6 +1,6 @@
 (function(slicease) {
 	var utils = slicease.utils,
-		sheet = createStylesheet().sheet;
+		sheet;
 	
 	function createStylesheet() {
 		var styleSheet = document.createElement('style');
@@ -18,6 +18,10 @@
 	}
 	
 	var css = utils.css = function(selector, styles) {
+		if (!sheet) {
+			sheet = createStylesheet().sheet;
+		}
+		
 		var _styles = '';
 		utils.foreach(styles, function(style, value) {
 			_styles += style + ': ' + value + '; ';

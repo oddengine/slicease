@@ -4,7 +4,10 @@
 		states = events.state,
 		core = slicease.core,
 		renders = core.renders,
-		css = utils.css;
+		css = utils.css,
+		
+		VIEW_CONTROLS_CONTAINER_CLASS = 'secontrols',
+		PAGER_CONTAINER_CLASS = 'sepager';
 	
 	function p(a, b, c) {
 		return {x: a || 0, y: b || 0, z: c || 0};
@@ -128,9 +131,8 @@
 		 		objectDistance: 100,
 		 		startAnimation: {
 		 			keyframes: {
-		 				'0%': { rotateX: 45, z: -1000, alpha: 0 },
-		 				'80%': { rotateX: 90 },
-		 				'100%': { z: 0, alpha: 100 }
+		 				'from': { rotateX: 45, z: -1000, alpha: 0 },
+		 				'to': { rotateX: 90, z: 0, alpha: 100 }
 		 			},
 		 			duration: 600,
 		 			'timing-function': 'ease',
@@ -140,9 +142,9 @@
 		 		},
 		 		animation: {
 		 			keyframes: {
-		 				'from': { rotateX: 0, z: 0 },
+		 				'0%': { rotateX: 0, z: 0 },
 		 				'50%': { z: -1000 },
-		 				'to': { rotateX: 90, z: 0 }
+		 				'100%': { rotateX: 90, z: 0 }
 		 			},
 		 			duration: 1200,
 		 			'timing-function': 'elastic',
@@ -199,6 +201,15 @@
 			_cvs.width = _canvas.width;
 			_cvs.height = _canvas.height;
 			_ctx = _cvs.getContext('2d');
+			
+			css('.' + VIEW_CONTROLS_CONTAINER_CLASS, {
+				height: _this.height + 'px',
+				top: _this.config.padding.top + 'px'
+			});
+			
+			css('.' + PAGER_CONTAINER_CLASS, {
+				bottom: Math.min(- 24 - (_this.config.padding.bottom - 24) / 2, -24) + 'px'
+			});
 		}
 		
 		function _parseConfig() {
@@ -268,7 +279,7 @@
 				animation.ease(time, function(k, v) {
 					switch (k) {
 						case 'alpha':
-							ctx.globalAlpha = v / 100;
+							_ctx.globalAlpha = v / 100;
 							break;
 						case 'rotateX':
 						case 'rotateY':
@@ -348,12 +359,12 @@
 		
 		function _drawTexture(points, index, pieces) {
 			var img = _images[_item],
-				swidth = Math.floor(img.width / pieces),
+				swidth = img.width / pieces,
 				sheight = img.height,
 				sx = swidth * index,
 				rightSide = index >= pieces / 2;
 			if (index === pieces - 1) {
-				swidth = img.width - swidth * index;
+				//swidth = img.width - swidth * index;
 			}
 			
 			if (_reverse) {
@@ -365,8 +376,11 @@
 				
 				// front side
 				if (points.b0.y > points.a0.y) {
-					_drawTriangle(img, sx, 0, swidth, sheight, points.a0, points.b0, rightSide ? null : points.a1, rightSide ? points.b1 : null, !rightSide);
-					_drawTriangle(img, sx, 0, swidth, sheight, rightSide ? points.a0 : null, rightSide ? null : points.b0, points.a1, points.b1, !rightSide);
+					var imgnext = _images[_next(_images, _item)];
+					imgnext.width = img.width;
+					imgnext.height = img.height;
+					_drawTriangle(imgnext, sx, 0, swidth, sheight, points.a0, points.b0, rightSide ? null : points.a1, rightSide ? points.b1 : null, !rightSide);
+					_drawTriangle(imgnext, sx, 0, swidth, sheight, rightSide ? points.a0 : null, rightSide ? null : points.b0, points.a1, points.b1, !rightSide);
 				}
 			} else {
 				// top side
@@ -377,8 +391,11 @@
 				
 				// front side
 				if (points.b0.y > points.a0.y) {
-					_drawTriangle(img, sx, 0, swidth, sheight, points.a0, points.b0, rightSide ? points.a1 : null, rightSide ? null : points.b1, !rightSide);
-					_drawTriangle(img, sx, 0, swidth, sheight, rightSide ? null : points.a0, rightSide ? points.b0 : null, points.a1, points.b1, !rightSide);
+					var imgprev = _images[_prev(_images, _item)];
+					imgprev.width = img.width;
+					imgprev.height = img.height;
+					_drawTriangle(imgprev, sx, 0, swidth, sheight, points.a0, points.b0, rightSide ? points.a1 : null, rightSide ? null : points.b1, !rightSide);
+					_drawTriangle(imgprev, sx, 0, swidth, sheight, rightSide ? null : points.a0, rightSide ? points.b0 : null, points.a1, points.b1, !rightSide);
 				}
 			}
 			
@@ -396,9 +413,9 @@
 			cvs.height = _canvas.height;
 			ctx = cvs.getContext('2d');
 			
-			var a, b = 0, c, d, e = 0, f = 0,
-				e = a0 === null ? b0.x + a1.x - b1.x : a0.x,
-				f = a0 === null ? a1.y : a0.y;
+			var a, b = 0, c, d,
+				e = a0 ? a0.x : b0.x + a1.x - b1.x,
+				f = a0 ? a0.y : a1.y;
 			
 			ctx.beginPath();
 			ctx.strokeStyle = _this.config.strokeStyle;
@@ -491,7 +508,7 @@
 			var pieces = parseInt(_this.config.pieces[_pieceIndex]);
 			
 			_cuboids = [];
-			var wth = Math.floor(_this.width / pieces);
+			var wth = _this.width / pieces;
 			for (var i = 0; i < pieces; i++) {
 				if (i === pieces - 1) {
 					//wth = _this.width - wth * i;

@@ -43,14 +43,8 @@
 			_prev = utils.createElement('div', DISPLAY_PREV_CLASS);
 			_next = utils.createElement('div', DISPLAY_NEXT_CLASS);
 			
-			switch (slicer.skin.type) {
-				case 'svg':
-					_prev.innerHTML = '<svg viewBox="0 0 1024 1024"><use xlink:href="#seskin_prev"></svg>';
-					_next.innerHTML = '<svg viewBox="0 0 1024 1024"><use xlink:href="#seskin_next"></svg>';
-					break;
-				default:
-					break;
-			}
+			_prev.innerHTML = '<svg viewBox="0 0 1024 1024"><use xlink:href="#seskin_prev"></svg>';
+			_next.innerHTML = '<svg viewBox="0 0 1024 1024"><use xlink:href="#seskin_next"></svg>';
 			
 			_prev.addEventListener('click', slicer.prev);
 			_next.addEventListener('click', slicer.next);
@@ -60,6 +54,16 @@
 			
 			_display.addEventListener('onmouseover', _onMouseOver);
 			_display.addEventListener('onmouseout', _onMouseOut);
+			
+			css('.' + DISPLAY_PREV_CLASS + ', .' + DISPLAY_NEXT_CLASS, {
+				width: _this.config.btnStyle.width,
+				height: _this.config.btnStyle.height
+			});
+			
+			css('.' + DISPLAY_PREV_CLASS + ' svg, .' + DISPLAY_NEXT_CLASS + ' svg', {
+				width: '100%',
+				height: _this.config.btnStyle.width
+			});
 		}
 		
 		function _onMouseOver(e) {
@@ -95,5 +99,48 @@
         _init();
 	};
 	
+	css('.' + DISPLAY_CONTAINER_CLASS, {
+		width: '100%',
+		height: '100%',
+		filter: 'Alpha(opacity=0)',
+		opacity: 0
+	});
 	
+	css('.' + DISPLAY_CONTAINER_CLASS + ':hover', {
+		filter: 'Alpha(opacity=100)',
+		opacity: 1
+	});
+	
+	css('.' + DISPLAY_PREV_CLASS + ', .' + DISPLAY_NEXT_CLASS, {
+		width: '40px',
+		height: '100%',
+		position: 'relative',
+		cursor: 'pointer',
+		filter: 'Alpha(opacity=30)',
+		opacity: 0.3
+	});
+	
+	css('.' + DISPLAY_PREV_CLASS, {
+		float: 'left'
+	});
+	css('.' + DISPLAY_NEXT_CLASS, {
+		float: 'right'
+	});
+	
+	css('.' + DISPLAY_PREV_CLASS + ':hover, .' + DISPLAY_NEXT_CLASS + ':hover', {
+		filter: 'Alpha(opacity=60)',
+		opacity: 0.6
+	});
+	
+	css('.' + DISPLAY_PREV_CLASS + ' svg, .' + DISPLAY_NEXT_CLASS + ' svg', {
+		'margin-top': '-20px',
+		width: '100%',
+		height: '40px',
+		position: 'absolute',
+		top: '50%'
+	});
+	
+	css('.' + DISPLAY_PREV_CLASS + ':hover svg, .' + DISPLAY_NEXT_CLASS + ':hover svg', {
+		fill: '#0f0'
+	});
 })(slicease);

@@ -10,14 +10,12 @@
 			width: 480,
 			height: 270,
 	 		controls: true,
-	 		skin: 'default',
 	 		canvas: {},
 	 		display: {},
 	 		pager: {},
 	 		interval: 3500,
 	 		renderMode: renderMode.CANVAS,
-			fallback: true,
-			aspectratio: ''
+			fallback: true
 		},
 		_config = utils.extend({}, _defaults, config);
 		
