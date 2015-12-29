@@ -174,7 +174,7 @@
 		
 		function _init() {
 			_this.config = utils.extend({}, _defaults, config, {
-				startAnimation: utils.extend({}, _defaults.startAnimation, config.startAnimation),
+				startAnimation: utils.extend({}, _defaults.startAnimation, config.hasOwnProperty('startAnimation') ? config.startAnimation : {}),
 				animation: (function() {
 					var ani = [],
 						cfgani = utils.typeOf(config.animation) === 'array' ? config.animation : [config.animation];
@@ -233,7 +233,7 @@
 				_this.height = slicer.model.height - _this.config.padding.top - _this.config.padding.bottom;
 			}
 			
-			if (config.startAnimation) {
+			if (_this.config.startAnimation) {
 				_startanimation = new slicease.animation(_this.config.startAnimation);
 			}
 			for (var a = 0; a < _this.config.animation.length; a++) {
