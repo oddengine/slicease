@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" dir="ltr" lang="en">
+<head>
+	<title>Html5 Canvas Test</title>
+	
+</head>
+<body>
+	<div id='wrap'>
+		<canvas id='canvas' style='width: 1120px; height: 380px; background: #ccc;'></canvas>
+	</div>
+	
+	<script type="text/javaScript">
+		var canvas = document.getElementById('canvas');
+		canvas.width = 1120;
+		canvas.height = 380;
+		var context = canvas.getContext('2d');
+		
+		var cvs = document.createElement('canvas');
+		cvs.width = canvas.width;
+		cvs.height = canvas.height;
+		var ctx = cvs.getContext('2d');
+		
+		var img = new Image();
+		img.src = 'images/img1.png';
+		
+		var a = 200 / img.width,
+			c = -100 / img.height,
+			d = 100 / img.height;
+		ctx.setTransform(a, 0, c, d, 200, 100);
+		ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+		
+		context.drawImage(cvs, 0, 0, cvs.width, cvs.height, 0, 0, canvas.width, canvas.height);
+	</script>
+</body>
+</html>

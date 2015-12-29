@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" dir="ltr" lang="en">
+<head>
+	<title>Html5 Canvas Test</title>
+	<!--<link type="text/css" rel="stylesheet" href="css/style.css" />-->
+	<script type='text/javascript' src='../cn/slicease/slicease.js'></script>
+	<script type='text/javascript' src='../cn/slicease/utils/slicease.utils.js'></script>
+	<script type='text/javascript' src='../cn/slicease/utils/slicease.utils.css.js'></script>
+	<script type='text/javascript' src='../cn/slicease/events/slicease.events.js'></script>
+	<script type='text/javascript' src='../cn/slicease/events/slicease.events.eventdispatcher.js'></script>
+	<script type='text/javascript' src='../cn/slicease/utils/slicease.utils.timer.js'></script>
+	<script type='text/javascript' src='../cn/slicease/slicease.api.js'></script>
+	<script type='text/javascript' src='../cn/slicease/animation/slicease.animation.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/slicease.core.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/renders/slicease.core.renders.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/renders/slicease.core.renders.imageloader.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/renders/slicease.core.renders.spare.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/renders/slicease.core.renders.canvas.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/components/slicease.core.components.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/components/slicease.core.components.display.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/components/slicease.core.components.pager.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/slicease.core.slicer.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/slicease.core.model.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/slicease.core.view.js'></script>
+	<script type='text/javascript' src='../cn/slicease/core/slicease.core.controller.js'></script>
+	<script type='text/javascript' src='../cn/slicease/embed/slicease.embed.js'></script>
+	<script type='text/javascript' src='../cn/slicease/embed/slicease.embed.config.js'></script>
+	<script type='text/javascript' src='../cn/slicease/embed/slicease.embed.spare.js'></script>
+	<script type='text/javascript' src='../cn/slicease/embed/slicease.embed.canvas.js'></script>
+</head>
+<body>
+	<div style='display: none;'>
+		<svg id="seskin" xml:space="preserve" enable-background="new 0 0 1024 1024" viewBox="0 0 1024 1024" height="1024px" width="1024px" y="0px" x="0px" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" version="1.1">
+			<path id="seskin_prev" transform="translate(0, 812) scale(1, -1)" d="M658.29178-191.504117l223.006914 0L398.119373 291.657405 881.298746 812 658.291782 812 175.112507 291.657405 658.29178-191.504117z" fill="#ffffff">
+			<path id="seskin_next" transform="translate(0, 812) scale(1, -1)" d="M881.298746 291.657405 398.119373 812 175.112486 812 658.29178 291.657405 175.112507-191.504117l223.006914 0L881.298746 291.657405z" fill="#ffffff">
+		</svg>
+	</div>
+	<div style='margin: 0 auto; width: 1200px;'>
+		<div id='slicer' class='sewrap'>
+			<!--<div id='slicer_menu' class='semenu'></div>
+			<span id='slicer_view' class='semain'>
+				<span id='slicer_images' class='seimages'>
+					<canvas style='width: 1200px; height: 500px;'>Canvas not supported!</canvas>
+				</span>
+				<span id='slicer_controls' class='secontrols'>
+					<div id='slicer_display' class='sedisplay'>
+						<div class='seprev'>
+							<svg viewBox="0 0 1024 1024"><use xlink:href="#seskin_prev" /></svg>
+						</div>
+						<div class='senext'>
+							<svg viewBox="0 0 1024 1024"><use xlink:href="#seskin_next" /></svg>
+						</div>
+					</div>
+					<div id='slicer_pager' class='sepager'>
+						<span>
+							<a>1</a>
+							<a>2</a>
+							<a>3</a>
+						</span>
+					</div>
+				</span>
+			</span>-->
+		</div>
+	</div>
+	
+	<script type="text/javaScript">
+		var sli = slicease('slicer').setup({
+			width: 1200,
+			height: 500,
+			sources: ['images/img1.png', 'images/img2.png', 'images/img3.png'],
+			canvas: {
+				pieces: [7, 8, 7, 6]
+			}
+		});
+	</script>
+</body>
+</html>
