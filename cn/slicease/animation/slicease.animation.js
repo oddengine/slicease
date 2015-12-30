@@ -135,7 +135,7 @@
 					points = [p(0, 0), p(0.5, 0.5), p(0.75, 1), p(0.85, 2), p(0.95, 1), p(0.97, 0.7), p(1, 1)];
 					break;
 				case timingfunction.WAVES_IN:
-					points = [p(0, 0), p(0.2, -0.5), p(0.4, 0.5), p(0.6, -0.5), p(1, 1)]; 
+					points = [p(0, 0), p(0.2, -0.5), p(0.4, 0.5), p(0.6, -0.5), p(1, 1)];
 					break;
 				default:
 					points = _points;
