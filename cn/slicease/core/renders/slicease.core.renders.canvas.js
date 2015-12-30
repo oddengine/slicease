@@ -164,7 +164,7 @@
 		 			delay: 0,
 		 			'iteration-count': 1,
 		 			direction: 'normal'
-		 		}, {
+		 		}, { 
 		 			properties: {
 		 				rotateX: { keyframes: { from: 0, '60%': 0, to: 90 } },
 		 				scaleX: { keyframes: { from: 1, '60%': 0.8, to: 1 }, 'timing-function': 'linear' },
