@@ -10,7 +10,7 @@
 		PAGER_CONTAINER_CLASS = 'sepager';
 	
 	function p(a, b, c) {
-		return {x: a || 0, y: b || 0, z: c || 0};
+		return { x: a || 0, y: b || 0, z: c || 0 };
 	}
 	
 	function cuboid(width, height, origin) {
@@ -124,37 +124,74 @@
 			_defaults = {
 				pieces: [7],
 		 		delays: function(index, pieces, item, reverse) {
-		 			return (reverse ? pieces - index - 1 : index) * 200;
+		 			return (reverse ? pieces - index - 1 : index) * (pieces > 5 ? 100 : 200);
 		 		},
 		 		padding: '50px 40px 70px',
 		 		sightDistance: 1200,
 		 		objectDistance: 100,
 		 		startAnimation: {
-		 			keyframes: {
-		 				'from': { rotateX: 45, z: -1000, alpha: 0 },
-		 				'to': { rotateX: 90, z: 0, alpha: 100 }
+		 			properties: {
+		 				rotateX: { keyframes: { from: 45, to: 90 } },
+		 				scaleX: { keyframes: { from: 0.9, to: 1 } },
+		 				z: { keyframes: { from: -1000, to: 0 } },
+		 				alpha: { keyframes: { from: 0, to: 100 } }
 		 			},
 		 			duration: 600,
-		 			'timing-function': 'linear',
+		 			'timing-function': 'ease-out',
 		 			delay: 0,
 		 			'iteration-count': 1,
 		 			direction: 'normal'
 		 		},
-		 		animation: {
-		 			keyframes: {
-		 				'0%': { rotateX: 0, z: 0 },
-		 				'50%': { z: -1000 },
-		 				'100%': { rotateX: 90, z: 0 }
+		 		animation: [{
+		 			properties: {
+		 				rotateX: { keyframes: { from: 0, to: 90 } },
+		 				scaleX: { keyframes: { from: 1, '40%': 0.9, to: 1 }, 'timing-function': 'linear' },
+		 				z: { keyframes: { from: 0, '40%': -800, '80%': 0 }, 'timing-function': 'ease-out' }
 		 			},
 		 			duration: 1200,
-		 			'timing-function': 'linear',
+		 			'timing-function': 'elastic',
 		 			delay: 0,
 		 			'iteration-count': 1,
 		 			direction: 'normal'
-		 		},
+		 		}, {
+		 			properties: {
+		 				rotateX: { keyframes: { from: 0, to: 90 } },
+		 				scaleX: { keyframes: { from: 1, '25%': 0.9, '75%': 0.9, to: 1 }, 'timing-function': 'linear' },
+		 				z: { keyframes: { from: 0, '25%': -1000, '60%': -1000, to: 0 }, 'timing-function': 'ease-out' }
+		 			},
+		 			duration: 1200,
+		 			'timing-function': 'waves-in',
+		 			delay: 0,
+		 			'iteration-count': 1,
+		 			direction: 'normal'
+		 		}, {
+		 			properties: {
+		 				rotateX: { keyframes: { from: 0, '60%': 0, to: 90 } },
+		 				scaleX: { keyframes: { from: 1, '60%': 0.8, to: 1 }, 'timing-function': 'linear' },
+		 				scaleY: { keyframes: { from: 1, '60%': 0.8, to: 1 }, 'timing-function': 'linear' },
+		 				z: { keyframes: { from: 0, '80%': -400, to: 0 }, 'timing-function': 'ease-out' }
+		 			},
+		 			duration: 1200,
+		 			'timing-function': 'ease-out',
+		 			delay: 0,
+		 			'iteration-count': 1,
+		 			direction: 'normal'
+		 		}, {
+		 			properties: {
+		 				rotateX: { keyframes: { from: 0, to: 90 } },
+		 				scaleX: { keyframes: { from: 1, '50%': 0.9, to: 1 } },
+		 				z: { keyframes: { from: 0, '50%': -800, to: 0 } }
+		 			},
+		 			duration: 1200,
+		 			'timing-function': 'ease-in-out',
+		 			delay: 0,
+		 			'iteration-count': 1,
+		 			direction: 'normal'
+		 		}],
 		 		fps: 24,
 		 		strokeStyle: 'rgb(0,0,250)',
-		 		sideColor: '#cccccc'
+		 		tbStyle: '#aaa',
+		 		lrStyle: '#ccc'
 			},
 			
 			_canvas, _context,
@@ -164,6 +201,7 @@
 			_images = [],
 			_cuboids,
 			_camera,
+			_previtem = -1,
 			_item = -1,
 			_pieceIndex = -1,
 			_animationIndex = -1,
@@ -173,17 +211,7 @@
 			_reverse = false;
 		
 		function _init() {
-			_this.config = utils.extend({}, _defaults, config, {
-				startAnimation: utils.extend({}, _defaults.startAnimation, config.hasOwnProperty('startAnimation') ? config.startAnimation : {}),
-				animation: (function() {
-					var ani = [],
-						cfgani = utils.typeOf(config.animation) === 'array' ? config.animation : [config.animation];
-					for (var i = 0; i < cfgani.length; i++) {
-						ani.push(utils.extend({}, _defaults.animation, cfgani[i]));
-					}
-					return ani;
-				})()
-			});
+			_this.config = utils.extend({}, _defaults, config);
 			_parseConfig();
 			
 			_canvas = utils.createElement('canvas');
@@ -233,7 +261,7 @@
 				_this.height = slicer.model.height - _this.config.padding.top - _this.config.padding.bottom;
 			}
 			
-			if (_this.config.startAnimation) {
+			if (!config.hasOwnProperty('startAnimation') || config.startAnimation !== null) {
 				_startanimation = new slicease.animation(_this.config.startAnimation);
 			}
 			for (var a = 0; a < _this.config.animation.length; a++) {
@@ -245,11 +273,13 @@
 		}
 		
 		_this.play = function(item, reverse) {
-			var prev = _item;
+			_previtem = _item < 0 ? slicer.model.sources.length - 1 : _item;
 			_item = item || 0;
 			
 			_resetCuboids();
-			_reverse = reverse || (prev > _item && (prev !== slicer.model.sources.length - 1 || _item !== 0));
+			_reverse = reverse || (_previtem > _item && (_previtem !== slicer.model.sources.length - 1 || _item !== 0));
+			
+			_animationIndex = _next(_animations, _animationIndex);
 			
 			if (!_timer) {
 				_timer = new utils.timer(_interval);
@@ -264,7 +294,6 @@
 			
 			var animation = _startanimation;
 			if (_loaded || animation === undefined) {
-				_animationIndex = _next(_animations, _animationIndex);
 				animation = _animations[_animationIndex];
 			}
 			
@@ -367,6 +396,26 @@
 				//swidth = img.width - swidth * index;
 			}
 			
+			if (index < pieces / 2) {
+				// right side
+				_fill(points.a1, points.b1, points.c1, points.d1, _this.config.lrStyle, true);
+				if (_reverse) {
+					// top side
+					if (points.a0.y > points.d0.y) {
+						_fill(points.a0, points.a1, points.d1, points.d0, _this.config.tbStyle, true);
+					}
+				} else {
+					// bottom side
+					if (points.c0.y > points.b0.y) {
+						_fill(points.b0, points.b1, points.c1, points.c0, _this.config.tbStyle, true);
+					}
+				}
+				// back side
+				if (points.d0.y > points.c0.y) {
+					_fill(points.c0, points.c1, points.d1, points.d0, _this.config.tbStyle, true);
+				}
+			}
+			
 			if (_reverse) {
 				// bottom side
 				if (points.c0.y > points.b0.y) {
@@ -376,7 +425,7 @@
 				
 				// front side
 				if (points.b0.y > points.a0.y) {
-					var imgnext = _images[_next(_images, _item)];
+					var imgnext = _images[_previtem];
 					imgnext.width = img.width;
 					imgnext.height = img.height;
 					_drawTriangle(imgnext, sx, 0, swidth, sheight, points.a0, points.b0, rightSide ? null : points.a1, rightSide ? points.b1 : null, !rightSide);
@@ -391,7 +440,7 @@
 				
 				// front side
 				if (points.b0.y > points.a0.y) {
-					var imgprev = _images[_prev(_images, _item)];
+					var imgprev = _images[_previtem];
 					imgprev.width = img.width;
 					imgprev.height = img.height;
 					_drawTriangle(imgprev, sx, 0, swidth, sheight, points.a0, points.b0, rightSide ? points.a1 : null, rightSide ? null : points.b1, !rightSide);
@@ -399,10 +448,24 @@
 				}
 			}
 			
-			if (rightSide) {
-				_fillSide(points.a0, points.b0, points.c0, points.d0);
-			} else {
-				_fillSide(points.a1, points.b1, points.c1, points.d1);
+			if (index > pieces / 2) {
+				// left side
+				_fill(points.a0, points.b0, points.c0, points.d0, _this.config.lrStyle, false);
+				if (_reverse) {
+					// top side
+					if (points.a0.y > points.d0.y) {
+						_fill(points.a0, points.a1, points.d1, points.d0, _this.config.tbStyle, false);
+					}
+				} else {
+					// bottom side
+					if (points.c0.y > points.b0.y) {
+						_fill(points.b0, points.b1, points.c1, points.c0, _this.config.tbStyle, false);
+					}
+				}
+				// back side
+				if (points.d0.y > points.c0.y) {
+					_fill(points.c0, points.c1, points.d1, points.d0, _this.config.tbStyle, false);
+				}
 			}
 		}
 		
@@ -463,15 +526,15 @@
 			_ctx.drawImage(cvs, 0, 0, cvs.width, cvs.height, 0, 0, _cvs.width, _cvs.height);
 		}
 		
-		function _fillSide(a, b, c, d) {
-			_ctx.globalCompositeOperation = 'destination-over';
+		function _fill(a, b, c, d, fillStyle, sourceOver) {
+			_ctx.globalCompositeOperation = sourceOver ? 'source-over' : 'destination-over';
 			_ctx.beginPath();
 			_ctx.moveTo(a.x, a.y);
 			_ctx.lineTo(b.x, b.y);
 			_ctx.lineTo(c.x, c.y);
 			_ctx.lineTo(d.x, d.y);
 			_ctx.lineTo(a.x, a.y);
-			_ctx.fillStyle = _this.config.sideColor;
+			_ctx.fillStyle = fillStyle || '#ccc';
 			_ctx.fill();
 			_ctx.closePath();
 		}

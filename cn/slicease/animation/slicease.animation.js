@@ -7,17 +7,18 @@
 		EASE_IN: 'ease-in',
 		EASE_OUT: 'ease-out',
 		EASE_IN_OUT: 'ease-in-out',
-		ELASTIC: 'elastic'
+		ELASTIC: 'elastic',
+		WAVES_IN: 'waves-in'
 	};
 	
 	var p = function(a, b, c) {
-		return {x: a || 0, y: b || 0, z: c || 0};
+		return { x: a || 0, y: b || 0, z: c || 0 };
 	};
 	
 	slicease.animation = function(config) {
 		var _this = this,
 			_defaults = {
-				keyframes: {},
+				properties: {},
 	 			duration: 0,
 	 			'timing-function': timingfunction.EASE,
 	 			delay: 0,
@@ -28,57 +29,48 @@
 		
 		function _init() {
 			_this.config = utils.deepExtend({}, _defaults, config);
-			utils.deepExtend(_this, _this.config, {
-				keyframes: (function() {
-					var keyframes = [];
-					utils.foreach(_this.config.keyframes, function(key, val) {
-						keyframes.push({
-							ratio: (key === 'from' ? 0 : (key === 'to' ? 100 : parseInt(key))) / 100,
-							properties: val
-						});
+			utils.extend(_this, _this.config);
+			utils.foreach(_this.properties, function(name, property) {
+				var keyframes = [];
+				utils.foreach(property.keyframes, function(key, val) {
+					keyframes.push({
+						ratio: (key === 'from' ? 0 : (key === 'to' ? 100 : parseInt(key))) / 100,
+						value: val
 					});
-					keyframes.sort(function(a, b) {
-						return a.ratio - b.ratio;
-					});
-					return keyframes;
-				})()
+				});
+				keyframes.sort(function(a, b) {
+					return a.ratio - b.ratio;
+				});
+				property.keyframes = keyframes;
 			});
-			
-			_points = _getPoints();
 		}
 		
 		_this.ease = function(time, oneach) {
-			if (!_points || _points.length < 2) {
-				return;
-			}
-			
-			var timeratio = _getTimeRatio(time),
-				properties = {};
-			for (var i = 0; i < _this.keyframes.length; i++) {
-				var keyframe = _this.keyframes[i];
-				utils.foreach(keyframe.properties, function(key, val) {
-					if (properties.hasOwnProperty(key) === false) {
-						properties[key] = {};
+			var timeratio = _getTimeRatio(time);
+			utils.foreach(_this.properties, function(name, property) {
+				var prop = {};
+				for (var i = 0; i < property.keyframes.length; i++) {
+					var keyframe = property.keyframes[i];
+					if (keyframe.ratio < timeratio || prop.from === undefined) {
+						prop.from = keyframe.value;
+						prop.to = undefined;
+						prop.fr = keyframe.ratio;
+					} else if (prop.to === undefined) {
+						prop.to = keyframe.value;
+						prop.tr = keyframe.ratio;
 					}
-					if (keyframe.ratio < timeratio || properties[key].from === undefined) {
-						properties[key].from = val;
-						properties[key].to = undefined;
-						properties[key].fr = keyframe.ratio;
-					} else if (properties[key].to === undefined) {
-						properties[key].to = val;
-						properties[key].tr = keyframe.ratio;
-					}
-				});
-			}
-			
-			utils.foreach(properties, function(k, v) {
+				}
+				
 				if (typeof oneach === 'function') {
-					if (v.to === null) {
-						oneach(k, v.from);
+					if (prop.to === undefined) {
+						oneach(name, prop.from);
 					} else {
-						var shrinked = _bezierShrink(_points, (timeratio - v.fr) / (v.tr - v.fr)),
-							valueratio = shrinked[0].y;
-						oneach(k, v.from + (v.to - v.from) * valueratio);
+						var exacttimeratio = (timeratio - prop.fr) / (prop.tr - prop.fr),
+							points = _getPoints(property['timing-function']),
+							shrinked = _bezierShrink(points, exacttimeratio),
+							valueratio = shrinked[0].y,
+							finalvalue = prop.from + (prop.to - prop.from) * valueratio;
+						oneach(name, finalvalue);
 					}
 				}
 			});
@@ -118,9 +110,12 @@
 			return shrinked;
 		}
 		
-		function _getPoints() {
+		function _getPoints(timingfn) {
+			if (!timingfn) {
+				timingfn = _this['timing-function'];
+			}
 			var points;
-			switch (_this['timing-function']) {
+			switch (timingfn) {
 				case timingfunction.LINEAR:
 					points = [p(0, 0), p(1, 1)];
 					break;
@@ -138,7 +133,12 @@
 					break;
 				case timingfunction.ELASTIC:
 					points = [p(0, 0), p(0.5, 0.5), p(0.75, 1), p(0.85, 2), p(0.95, 1), p(0.97, 0.7), p(1, 1)];
+					break;
+				case timingfunction.WAVES_IN:
+					points = [p(0, 0), p(0.2, -0.5), p(0.4, 0.5), p(0.6, -0.5), p(1, 1)];
+					break;
 				default:
+					points = _points;
 					break;
 			}
 			return points;
