@@ -1,4 +1,4 @@
-(function(slicease) {
+﻿(function(slicease) {
     slicease.events = {
 		// General Events
 		ERROR: 'ERROR',

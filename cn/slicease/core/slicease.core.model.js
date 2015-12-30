@@ -1,4 +1,4 @@
-(function(slicease) {
+﻿(function(slicease) {
 	var utils = slicease.utils,
 		events = slicease.events,
 		core = slicease.core;

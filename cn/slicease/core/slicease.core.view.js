@@ -1,4 +1,4 @@
-(function(window) {
+﻿(function(window) {
 	var slicease = window.slicease,
 		utils = slicease.utils,
 		events = slicease.events,

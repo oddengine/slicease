@@ -1,4 +1,4 @@
-(function(slicease) {
+﻿(function(slicease) {
 	slicease.core = {};
 	
 	var css = slicease.utils.css;
