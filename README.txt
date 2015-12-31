@@ -27,7 +27,7 @@ var sli = slicease('slicer').setup({
 	sources: ['images/img1.png', 'images/img2.png', 'images/img3.png'],
 	renderMode: 'canvas',// default mode
 	canvas: {
-		pieces: [7, 8, 7, 6]
+		pieces: [9, 10, 8, 3]
 	}
 });
 //endscript
