@@ -25,6 +25,7 @@ var sli = slicease('slicer').setup({
 	width: 1200,
 	height: 500,
 	sources: ['images/img1.png', 'images/img2.png', 'images/img3.png'],
+	renderMode: 'canvas',// default mode
 	canvas: {
 		pieces: [7, 8, 7, 6]
 	}
