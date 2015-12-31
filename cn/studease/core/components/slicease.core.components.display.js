@@ -121,10 +121,10 @@
 	});
 	
 	css('.' + DISPLAY_PREV_CLASS, {
-		float: 'left'
+		'float': 'left'
 	});
 	css('.' + DISPLAY_NEXT_CLASS, {
-		float: 'right'
+		'float': 'right'
 	});
 	
 	css('.' + DISPLAY_PREV_CLASS + ':hover, .' + DISPLAY_NEXT_CLASS + ':hover', {

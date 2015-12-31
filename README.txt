@@ -32,3 +32,7 @@ var sli = slicease('slicer').setup({
 //endscript
 
 For more configurations, please search for the variables named '_defaults'.
+
+### Modify ###
+
+Please check the test/index.html for scripts sequence.
