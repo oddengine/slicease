@@ -398,7 +398,9 @@
 			
 			if (index < pieces / 2) {
 				// right side
-				_fill(points.a1, points.b1, points.c1, points.d1, _this.config.lrStyle, true);
+				if (pieces / 2 - index !== 0.5) {
+					_fill(points.a1, points.b1, points.c1, points.d1, _this.config.lrStyle, true);
+				}
 				if (_reverse) {
 					// top side
 					if (points.a0.y > points.d0.y) {
@@ -448,7 +450,7 @@
 				}
 			}
 			
-			if (index > pieces / 2) {
+			if (index >= pieces / 2) {
 				// left side
 				_fill(points.a0, points.b0, points.c0, points.d0, _this.config.lrStyle, false);
 				if (_reverse) {
