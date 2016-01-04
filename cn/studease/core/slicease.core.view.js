@@ -37,8 +37,7 @@
 			_controlsLayer,
 			_display,
 			_pager,
-			_errorState = false,
-			_skin;
+			_errorState = false;
 		
 		function _init() {
 			_slicerWrapper = utils.createElement('div', SLICER_CLASS);

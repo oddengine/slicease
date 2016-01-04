@@ -20,7 +20,7 @@
 			_img.onerror = function() {
 				_loading = false;
 				_error = true;
-				if (onerror  && typeof onerror === 'function') {
+				if (onerror && typeof onerror === 'function') {
 					onerror();
 				}
 			};
