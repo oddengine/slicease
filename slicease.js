@@ -3,7 +3,7 @@
 		return slicease.api.getSlicer.apply(this, arguments);
 	}
 };
-slicease.version = '2.0.06';
+slicease.version = '0.0.01';
 (function(slicease) {
 	var utils = slicease.utils = {};
     
@@ -820,7 +820,7 @@ slicease.version = '2.0.06';
 			_img.onerror = function() {
 				_loading = false;
 				_error = true;
-				if (onerror && typeof onerror === 'function') {
+				if (onerror  && typeof onerror === 'function') {
 					onerror();
 				}
 			};
@@ -1894,7 +1894,8 @@ slicease.version = '2.0.06';
 			_controlsLayer,
 			_display,
 			_pager,
-			_errorState = false;
+			_errorState = false,
+			_skin;
 		
 		function _init() {
 			_slicerWrapper = utils.createElement('div', SLICER_CLASS);
@@ -2341,7 +2342,7 @@ slicease.version = '2.0.06';
 			var slicer = new core.slicer(config);
 			slicer.addGlobalListener(_onEvent);
 			slicer.setup();
-			api.setSlicer(slicer, config.renderMode);
+			api.setSlicer(slicer, _this.renderMode);
 		};
 		
 		function _onEvent(e) {

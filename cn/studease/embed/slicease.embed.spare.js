@@ -14,7 +14,7 @@
 			var slicer = new core.slicer(config);
 			slicer.addGlobalListener(_onEvent);
 			slicer.setup();
-			api.setSlicer(slicer, config.renderMode);
+			api.setSlicer(slicer, _this.renderMode);
 		};
 		
 		function _onEvent(e) {

@@ -3,4 +3,4 @@
 		return slicease.api.getSlicer.apply(this, arguments);
 	}
 };
-slicease.version = '2.0.06';
+slicease.version = '0.0.01';
