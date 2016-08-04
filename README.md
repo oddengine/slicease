@@ -64,7 +64,7 @@ animation: [{
 ...
 ```
 
-You can easily change the params here, or setup a new animation array at the very fron initialization.
+You can easily change the params here, or setup a new animation array at the very front initialization.
 
 
 ## Modify
