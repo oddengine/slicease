@@ -1,10 +1,10 @@
 # slicease.js
 
-> [domain] (http://studease.cn) (http://studease.cn)
+> [[DOMAIN] studease.cn](http://studease.cn)
 
-> [source] (https://github.com/studease/Slicease) (https://github.com/studease/Slicease)
+> [[SOURCE] https://github.com/studease/Slicease](https://github.com/studease/Slicease)
 
-> [zh_doc] (http://blog.csdn.net/icysky1989/article/details/39624155) (http://blog.csdn.net/icysky1989/article/details/39624155)
+> [[ZH_DOC] http://blog.csdn.net/icysky1989](http://blog.csdn.net/icysky1989/article/details/39624155)
 
 This is a 3D image rotator using html5 canvas, designed for my homepage. 
 
