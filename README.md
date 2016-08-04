@@ -1,7 +1,9 @@
 # slicease.js
 
 > [domain] (http://studease.cn/)
+
 > [source] (https://github.com/studease/Slicease)
+
 > [zh_doc] (http://blog.csdn.net/icysky1989/article/details/39624155)
 
 This is a 3D image rotator designed for my personal homepage. 
