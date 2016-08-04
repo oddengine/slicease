@@ -6,7 +6,7 @@
 
 > [zh_doc] (http://blog.csdn.net/icysky1989/article/details/39624155)
 
-This is a 3D image rotator designed for my personal homepage. 
+This is a 3D image rotator using html5 canvas, designed for my homepage. 
 
 It is built on html5 canvas and wrote in pure javascript. Unlike with the css3 animation, the control points of bezier curve are not limited in the range of 0 to 1, so is the number of the points. It also has a powerful and easy-to-understand configuration.
 
