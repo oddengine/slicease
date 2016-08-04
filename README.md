@@ -13,10 +13,10 @@ It is built on html5 canvas and wrote in pure javascript. Unlike with the css3 a
 
 ## Example
 
-The example below will find the element with an id of sli-container and render a slicer into it.
+The example below will find the element with an id of sli-box and render a slicer into it.
 
 ```js
-var sli = slicease('slicer').setup({
+var sli = slicease('sli-box').setup({
 	width: 1200,
 	height: 500,
 	sources: ['images/img1.png', 'images/img2.png', 'images/img3.png'],
