@@ -1,6 +1,6 @@
 # slicease.js
 
-> [[DOMAIN] studease.cn](http://studease.cn)
+> [[DOMAIN] http://studease.cn](http://studease.cn)
 
 > [[SOURCE] https://github.com/studease/Slicease](https://github.com/studease/Slicease)
 
