@@ -4,7 +4,7 @@
 
 > [[source] https://github.com/studease/Slicease](https://github.com/studease/Slicease)
 
-> [[zh_doc] http://blog.csdn.net/icysky1989](http://blog.csdn.net/icysky1989/article/details/39624155)
+> [[zh_doc] http://blog.csdn.net/icysky1989/article/details/39624155](http://blog.csdn.net/icysky1989/article/details/39624155)
 
 This is a 3D image rotator using html5 canvas, designed for my homepage. 
 
