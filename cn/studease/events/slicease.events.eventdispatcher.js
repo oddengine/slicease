@@ -2,19 +2,18 @@
 	var utils = slicease.utils,
 		events = slicease.events;
 	
-	events.eventdispatcher = function(id, debug) {
+	events.eventdispatcher = function(id) {
 		var _id = id,
-			_debug = debug,
 			_listeners = {},
 			_globallisteners = [];
 		
 		this.addEventListener = function(type, listener, count) {
 			try {
-				if (!_listeners.hasOwnProperty(type)) {
+				if (!utils.exists(_listeners[type])) {
 					_listeners[type] = [];
 				}
 				
-				if (typeof(listener) === 'string') {
+				if (utils.typeOf(listener) === 'string') {
 					listener = (new Function('return ' + listener))();
 				}
 				_listeners[type].push({
@@ -51,7 +50,7 @@
 		
 		this.addGlobalListener = function(listener, count) {
 			try {
- 				if (typeof(listener) === 'string') {
+ 				if (utils.typeOf(listener) === 'string') {
 					listener = (new Function('return ' + listener))();
 				}
 				_globallisteners.push({
@@ -91,7 +90,7 @@
 				version: slicease.version,
 				type: type
 			});
-			if (_debug) {
+			if (slicease.debug) {
 				utils.log(type, data);
 			}
 			_dispatchEvent(_listeners[type], data, type);
@@ -118,4 +117,4 @@
 			}
 		}
 	};
-})(window.slicease);
+})(slicease);

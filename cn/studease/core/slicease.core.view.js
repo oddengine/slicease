@@ -1,119 +1,175 @@
-﻿(function(window) {
-	var slicease = window.slicease,
-		utils = slicease.utils,
+﻿(function(slicease) {
+	var utils = slicease.utils,
 		events = slicease.events,
-		renderMode = events.renderMode,
-		states = events.state,
-		embed = slicease.embed,
 		core = slicease.core,
+		states = core.states,
 		renders = core.renders,
-		components = core.components,
-		skins = slicease.skins,
+		rendermodes = renders.modes,
+		skins = core.skins,
+		skinmodes = skins.modes,
 		css = utils.css,
 		
-		SLICER_CLASS = 'sewrap',
-		MENU_CONTAINER_CLASS = 'semenu',
-		VIEW_CONTAINER_CLASS = 'semain',
-		VIEW_IMAGES_CONTAINER_CLASS = 'seimages',
-		VIEW_CONTROLS_CONTAINER_CLASS = 'secontrols',
+		WRAP_CLASS = 'sli-wrapper',
+		SKIN_CLASS = 'sli-skin',
+		RENDER_CLASS = 'sli-render',
+		POSTER_CLASS = 'sli-poster',
+		CONTROLS_CLASS = 'sli-controls',
+		CONTEXTMENU_CLASS = 'sli-contextmenu',
 		
 		// For all api instances
-		SE_CSS_SMOOTH_EASE = 'opacity .25s ease',
-		SE_CSS_100PCT = '100%',
-		SE_CSS_ABSOLUTE = 'absolute',
-		SE_CSS_IMPORTANT = ' !important',
-		SE_CSS_HIDDEN = 'hidden',
-		SE_CSS_NONE = 'none',
-		SE_CSS_BLOCK = 'block';
+		CSS_SMOOTH_EASE = 'opacity .25s ease',
+		CSS_100PCT = '100%',
+		CSS_ABSOLUTE = 'absolute',
+		CSS_RELATIVE = 'relative',
+		CSS_NORMAL = 'normal',
+		CSS_IMPORTANT = ' !important',
+		CSS_HIDDEN = 'hidden',
+		CSS_NONE = 'none',
+		CSS_BLOCK = 'block';
 	
-	core.view = function(slicer, model) {
-		var _this = utils.extend(this, new events.eventdispatcher()),
-			_slicerWrapper,
-			_menuLayer,
-			_rightClickMenu,
-			_container,
-			_imagesLayer,
-			_render,
+	core.view = function(entity, model) {
+		var _this = utils.extend(this, new events.eventdispatcher('core.view')),
+			_wrapper,
+			_renderLayer,
+			_posterLayer,
 			_controlsLayer,
-			_display,
-			_pager,
-			_errorState = false,
-			_skin;
+			_contextmenuLayer,
+			_render,
+			_skin,
+			_errorOccurred = false;
 		
 		function _init() {
-			_slicerWrapper = utils.createElement('div', SLICER_CLASS);
-			_slicerWrapper.id = slicer.id;
-			_slicerWrapper.tabIndex = 0;
+			_wrapper = utils.createElement('div', WRAP_CLASS + ',' + SKIN_CLASS + '-' + model.config.skin.name);
+			_wrapper.id = entity.id;
+			_wrapper.tabIndex = 0;
 			
-			_this.resize(model.width, model.height);
+			_renderLayer = utils.createElement('div', RENDER_CLASS);
+			_posterLayer = utils.createElement('div', POSTER_CLASS);
+			_controlsLayer = utils.createElement('div', CONTROLS_CLASS);
+			_contextmenuLayer = utils.createElement('div', CONTEXTMENU_CLASS);
 			
-			var replace = document.getElementById(slicer.id);
-			replace.parentNode.replaceChild(_slicerWrapper, replace);
+			_wrapper.appendChild(_renderLayer);
+			_wrapper.appendChild(_posterLayer);
+			_wrapper.appendChild(_controlsLayer);
+			_wrapper.appendChild(_contextmenuLayer);
+			
+			_initRender();
+			_initSkin();
+			
+			var replace = document.getElementById(entity.id);
+			replace.parentNode.replaceChild(_wrapper, replace);
+			
+			window.onresize = function() {
+				if (utils.typeOf(model.config.onresize) === 'function') 
+					model.config.onresize.call(null);
+			};
 		}
 		
-		_this.setup = function() {
-			_menuLayer = utils.createElement('div', MENU_CONTAINER_CLASS);
-			_menuLayer.id = slicer.id + '_menu';
-			_container = utils.createElement('span', VIEW_CONTAINER_CLASS);
-			_container.id = slicer.id + '_view';
-			
-			_imagesLayer = utils.createElement('span', VIEW_IMAGES_CONTAINER_CLASS);
-			_imagesLayer.id = slicer.id + '_images';
-			_setupRender();
-			
-			_controlsLayer = utils.createElement('span', VIEW_CONTROLS_CONTAINER_CLASS);
-			_controlsLayer.id = slicer.id + '_controls';
-			_setupControls();
-			
-			_container.appendChild(_imagesLayer);
-			_container.appendChild(_controlsLayer);
-			
-			_slicerWrapper.appendChild(_menuLayer);
-			_slicerWrapper.appendChild(_container);
-			
-			css('.' + SLICER_CLASS, {
-				width: model.width + 'px',
-				height: model.height + 'px'
+		function _initRender() {
+			var cfg = utils.extend({}, model.getConfig('render'), {
+				id: entity.id,
+				width: model.config.width,
+				height: model.config.height,
+				sources: model.config.sources,
+				range: model.config.range
 			});
 			
-			setTimeout(function() {
-				_this.resize(model.width, model.height);
-				_this.dispatchEvent(events.SLICEASE_READY);
-			}, 0);
-		};
-		
-		function _setupRender() {
-			switch (model.renderMode) {
-				case renderMode.CANVAS:
-					var canvasSettings = model.getConfig('canvas');
-					_this.render = _render = new renders.canvas(slicer, canvasSettings);
-					break;
-				case renderMode.SPARE:
-					
-					break;
-				default:
-					_this.dispatchEvent(events.SLICEASE_SETUP_ERROR, { message: 'Unknown render mode.' });
-					break;
+			try {
+				_render = _this.render = new renders[cfg.name](_this, cfg);
+				_render.addEventListener(events.SLICEASE_RENDER_UPDATE_START, _onRenderUpdateStart);
+				_render.addEventListener(events.SLICEASE_RENDER_UPDATE_END, _onRenderUpdateEnd);
+				_render.addEventListener(events.SLICEASE_RENDER_ERROR, _onRenderError);
+			} catch (e) {
+				utils.log('Failed to init render ' + cfg.name + '!');
 			}
 			
 			if (_render) {
-				_render.addEventListener(events.SLICEASE_STATE, _onState);
-				_render.addEventListener(events.SLICEASE_ITEM_CLICK, _onItemClick);
-				_render.addEventListener(events.SLICEASE_RENDER_ERROR, _onRenderError);
-				_imagesLayer.appendChild(_render.element());
+				_renderLayer.appendChild(_render.element());
 			}
 		}
 		
-		function _onState(e) {
+		function _initSkin() {
+			var cfg = utils.extend({}, model.getConfig('skin'), {
+				id: entity.id,
+				width: model.config.width,
+				height: model.config.height
+			});
+			
+			try {
+				_skin = new skins[cfg.name](_this, cfg);
+			} catch (e) {
+				utils.log('Failed to init skin ' + cfg.name + '!');
+			}
+		}
+		
+		_this.setup = function() {
+			if (!_render) {
+				_this.dispatchEvent(events.SLICEASE_SETUP_ERROR, { message: 'Render not available!', name: model.config.render.name });
+				return;
+			}
+			_render.setup();
+			
+			// Ignore skin failure.
+			
+			try {
+				_wrapper.addEventListener('keydown', _onKeyDown);
+			} catch (e) {
+				_wrapper.attachEvent('onkeydown', _onKeyDown);
+			}
+			
+			_this.dispatchEvent(events.SLICEASE_READY);
+		};
+		
+		function _onKeyDown(e) {
+			if (e.ctrlKey || e.metaKey) {
+				return true;
+			}
+			
+			switch (e.keyCode) {
+				case 13: // enter
+				case 32: // space
+					
+					break;
+				default:
+					break;
+			}
+			
+			if (/13|32/.test(e.keyCode)) {
+				// Prevent keypresses from scrolling the screen
+				e.preventDefault ? e.preventDefault() : e.returnValue = false;
+				return false;
+			}
+		}
+		
+		_this.resize = function(width, height) {
+			if (_render) 
+				_render.resize(width, height);
+			if (_skin) 
+				_skin.resize(width, height);
+		};
+		
+		_this.destroy = function() {
+			if (_wrapper) {
+				try {
+					_wrapper.removeEventListener('keydown', _onKeyDown);
+				} catch (e) {
+					_wrapper.detachEvent('onkeydown', _onKeyDown);
+				}
+			}
+			if (_render) {
+				_render.destroy();
+			}
+		};
+		
+		function _onRenderUpdateStart(e) {
 			_forward(e);
 		}
 		
-		function _onItemClick(e) {
+		function _onRenderUpdateEnd(e) {
 			_forward(e);
 		}
 		
 		function _onRenderError(e) {
-			_hideControls(true);
 			_forward(e);
 		}
 		
@@ -121,105 +177,6 @@
 			_this.dispatchEvent(e.type, e);
 		}
 		
-		function _setupControls() {
-			var displaySettings = model.getConfig('display'),
-				pagerSettings = model.getConfig('pager');
-			
-			_this.display = _display = new components.display(slicer, displaySettings);
-			_controlsLayer.appendChild(_display.element());
-			
-			_this.pager = _pager = new components.pager(slicer, pagerSettings);
-			_pager.addEventListener(events.SLICEASE_STATE, _onPagerClick);
-			_controlsLayer.appendChild(_pager.element());
-			
-			_slicerWrapper.addEventListener('keydown', _onKeyDown);
-		}
-		
-		function _onPagerClick(e) {
-			_forward(e);
-		}
-		
-		function _onKeyDown(e) {
-			if (!model.controls || e.ctrlKey || e.metaKey) {
-				return true;
-			}
-			
-			var se = slicease(slicer.id);
-			switch (e.keyCode) {
-				case 13: // enter
-				case 32: // space
-					se.play();
-					break;
-				case 37: // left-arrow
-				case 38: // up-arrow
-					se.prev();
-					break;
-				case 39: // right-arrow
-				case 40: // down-arrow
-					se.next();
-					break;
-				default:
-					break;
-			}
-			
-			if (/13|32|37|38|39|40/.test(e.keyCode)) {
-				// Prevent keypresses from scrolling the screen
-				e.preventDefault();
-				return false;
-			}
-		}
-		
-		function _hideControls(immediate) {
-			if (_display) _display.hide(immediate);
-			if (_pager) _pager.hide(immediate);
-		}
-		
-		_this.resize = function(width, height) {
-			
-		};
-		
-		_this.destroy = function() {
-			if (_slicerWrapper) {
-				_slicerWrapper.removeEventListener('keydown', _onKeyDown);
-			}
-			if (_display) {
-				_display.destroy();
-			}
-			if (_pager) {
-				_pager.destroy();
-			}
-			if (_render) {
-				_render.destroy();
-			}
-		};
-		
 		_init();
 	};
-	
-	css('.' + SLICER_CLASS + ', .' + SLICER_CLASS + ' *', {
-		margin: 0,
-		padding: 0,
-		display: 'block'
-	});
-	
-	css('.' + SLICER_CLASS, {
-		position: 'relative',
-		background: '#585862'
-	});
-	
-	css('.' + MENU_CONTAINER_CLASS + ', .' + VIEW_CONTAINER_CLASS + ', .' + VIEW_IMAGES_CONTAINER_CLASS, {
-		width: '100%',
-		height: '100%'
-	});
-	
-	css('.' + MENU_CONTAINER_CLASS, {
-		display: 'none'
-	});
-	
-	css('.' + VIEW_CONTROLS_CONTAINER_CLASS, {
-		width: '100%',
-		height: '100%',
-		position: 'absolute',
-		top: 0
-	});
-})(window);
+})(slicease);

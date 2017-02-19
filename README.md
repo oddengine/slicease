@@ -1,14 +1,12 @@
-# slicease.js
+# slicease.js 3.0
 
 > [[domain] http://studease.cn](http://studease.cn)
 
-> [[source] https://github.com/studease/Slicease](https://github.com/studease/Slicease)
+> [[source] https://github.com/studease/slicease](https://github.com/studease/slicease)
 
 > [[zh_doc] http://blog.csdn.net/icysky1989/article/details/39624155](http://blog.csdn.net/icysky1989/article/details/39624155)
 
-This is a 3D image rotator using html5 canvas, designed for my homepage. 
-
-It is built on html5 canvas and wrote in pure javascript. Unlike with the css3 animation, the control points of bezier curve are not limited in the range of 0 to 1, so is the number of the points. It also has a powerful and easy-to-understand configuration.
+This is a 3D image rotator using webgl, designed for my homepage. 
 
 
 ## Example
@@ -16,14 +14,11 @@ It is built on html5 canvas and wrote in pure javascript. Unlike with the css3 a
 The example below will find the element with an id of sli-box and render a slicer into it.
 
 ```js
-var sli = slicease('sli-box').setup({
+slicease('slicer').setup({
 	width: 1200,
 	height: 500,
 	sources: ['images/img1.png', 'images/img2.png', 'images/img3.png'],
-	renderMode: 'canvas', // default mode
-	canvas: {
-		pieces: [9, 10, 8, 3]
-	}
+	range: '3-6'
 });
 ```
 
@@ -31,40 +26,21 @@ For more configurations, please check cn/studease/embed/slicease.embed.config.js
 
 ```js
 _defaults = {
+	width: 640,
+	height: 360,
 	sources: [],
-	width: 480,
-	height: 270,
+	range: '3-10',
 	controls: true,
-	canvas: {},
-	display: {},
-	pager: {},
-	interval: 3500,
-	renderMode: renderMode.CANVAS,
-	fallback: true
+	interval: 5000,
+	render: {
+		name: rendermodes.DEFAULT,
+		precision: precisions.HIGH_P
+	},
+	skin: {
+		name: skinmodes.DEFAULT
+	}
 }
 ```
-
-And also cn/studease/core/renders/slicease.core.renders.canvas.js.
-
-```js
-_defaults = {
-...
-animation: [{
-	properties: {
-		rotateX: { keyframes: { from: 0, to: 90 } },
-		scaleX: { keyframes: { from: 1, '40%': 0.9, to: 1 }, 'timing-function': 'linear' },
-		z: { keyframes: { from: 0, '40%': -800, '80%': 0 }, 'timing-function': 'ease-out' }
-	},
-	duration: 1200,
-	'timing-function': 'elastic',
-	delay: 0,
-	'iteration-count': 1,
-	direction: 'normal'
-}, {
-...
-```
-
-You can easily change the params here, or setup a new animation array at the very front initialization.
 
 
 ## Modify

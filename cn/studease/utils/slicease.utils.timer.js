@@ -3,26 +3,24 @@
 		events = slicease.events;
 	
 	utils.timer = function(delay, repeatCount) {
-		var _this = utils.extend(this, new events.eventdispatcher()),
+		var _this = utils.extend(this, new events.eventdispatcher('utils.timer')),
 			_intervalId,
 			_currentCount = 0,
 			_running = false;
 		
 		function _init() {
-			utils.extend(_this, {
-				delay: delay || 50,
-				repeatCount: repeatCount || 0
-			});
+			_this.delay = delay || 50;
+			_this.repeatCount = repeatCount || 0;
 		}
 		
 		_this.start = function() {
 			if (_running === false) {
-				_intervalId = setInterval(_ontimer, _this.delay);
+				_intervalId = setInterval(_onTimer, _this.delay);
 				_running = true;
 			}
 		};
 		
-		function _ontimer() {
+		function _onTimer() {
 			_currentCount++;
 			_this.dispatchEvent(events.SLICEASE_TIMER);
 			

@@ -1,3 +1,3 @@
 ﻿(function(slicease) {
-	slicease.core.components = {};
+	slicease.core.skins = {};
 })(slicease);

@@ -6,27 +6,27 @@
 		var styleSheet = document.createElement('style');
 		styleSheet.type = 'text/css';
 		document.getElementsByTagName('head')[0].appendChild(styleSheet);
-		return styleSheet;
-	}
-	
-	function insertRule(sheet, text, index) {
-		try {
-			sheet.insertRule(text, index);
-		} catch (e) {
-			//console.log(e.message, text);
-		}
+		return styleSheet.sheet || styleSheet.styleSheet;
 	}
 	
 	var css = utils.css = function(selector, styles) {
 		if (!sheet) {
-			sheet = createStylesheet().sheet;
+			sheet = createStylesheet();
 		}
 		
 		var _styles = '';
 		utils.foreach(styles, function(style, value) {
 			_styles += style + ': ' + value + '; ';
 		});
-		insertRule(sheet, selector + ' { ' + _styles + '}', sheet.cssRules.length);
+		
+		try {
+			if (sheet.insertRule) 
+				sheet.insertRule(selector + ' { ' + _styles + '}', sheet.cssRules.length);
+			else 
+				sheet.addRule(selector, _styles, sheet.rules.length);
+		} catch (e) {
+			utils.log('Failed to insert css rule: ' + selector);
+		}
 	};
 	
 	css.style = function(elements, styles, immediate) {

@@ -1,6 +1,7 @@
 ﻿slicease = function() {
 	if (slicease.api) {
-		return slicease.api.getSlicer.apply(this, arguments);
+		return slicease.api.getInstance.apply(this, arguments);
 	}
 };
-slicease.version = '0.0.01';
+
+slicease.version = '3.0.00';

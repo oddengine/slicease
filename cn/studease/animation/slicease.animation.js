@@ -1,153 +1,140 @@
 ﻿(function(slicease) {
 	var utils = slicease.utils,
 		
-		timingfunction = {
-		LINEAR: 'linear',
-		EASE: 'ease',
-		EASE_IN: 'ease-in',
-		EASE_OUT: 'ease-out',
-		EASE_IN_OUT: 'ease-in-out',
-		ELASTIC: 'elastic',
-		WAVES_IN: 'waves-in'
-	};
-	
-	var p = function(a, b, c) {
-		return { x: a || 0, y: b || 0, z: c || 0 };
-	};
+		timingfunctions = {
+			LINEAR: 'linear',
+			EASE: 'ease',
+			EASE_IN: 'ease-in',
+			EASE_OUT: 'ease-out',
+			EASE_IN_OUT: 'ease-in-out',
+			ELASTIC: 'elastic',
+			WAVES_IN: 'waves-in',
+			CUBIC_BEZIER: 'cubic-bezier'
+		},
+		typicpoints = {
+			'linear': [0, 0, 1, 1],
+			'ease': [0.25, 0.1, 0.25, 1],
+			'ease-in': [0.42, 0, 1, 1],
+			'ease-out': [0, 0, 0.58, 1],
+			'ease-in-out': [0.42, 0, 0.58, 1],
+			'elastic': [0.42, 2, 0.58, 2],
+			'waves-in': [0.42, 1, 0.58, 1]
+		},
+		infinite = -1,
+		directions = {
+			NORMAL: 'normal',
+			ALTERNATE: 'alternate'
+		};
 	
 	slicease.animation = function(config) {
 		var _this = this,
 			_defaults = {
-				properties: {},
 	 			duration: 0,
-	 			'timing-function': timingfunction.EASE,
+	 			timingfunction: timingfunctions.EASE,
 	 			delay: 0,
-	 			'iteration-count': 1,
-	 			direction: 'normal'// alternate
+	 			iterationcount: 1,
+	 			direction: directions.NORMAL,
+	 			points: undefined,
+	 			factor: .2
 			},
+			_start,
+			_end,
 			_points;
 		
 		function _init() {
-			_this.config = utils.deepExtend({}, _defaults, config);
-			utils.extend(_this, _this.config);
-			utils.foreach(_this.properties, function(name, property) {
-				var keyframes = [];
-				utils.foreach(property.keyframes, function(key, val) {
-					keyframes.push({
-						ratio: (key === 'from' ? 0 : (key === 'to' ? 100 : parseInt(key))) / 100,
-						value: val
-					});
-				});
-				keyframes.sort(function(a, b) {
-					return a.ratio - b.ratio;
-				});
-				property.keyframes = keyframes;
-			});
-		}
-		
-		_this.ease = function(time, oneach) {
-			var timeratio = _getTimeRatio(time);
-			utils.foreach(_this.properties, function(name, property) {
-				var prop = {};
-				for (var i = 0; i < property.keyframes.length; i++) {
-					var keyframe = property.keyframes[i];
-					if (keyframe.ratio < timeratio || prop.from === undefined) {
-						prop.from = keyframe.value;
-						prop.to = undefined;
-						prop.fr = keyframe.ratio;
-					} else if (prop.to === undefined) {
-						prop.to = keyframe.value;
-						prop.tr = keyframe.ratio;
+			_this.config = utils.extend({}, _defaults, config);
+			
+			_start = [0, 0];
+			_end = [1, 1];
+			
+			var points = [];
+			switch (_this.config.timingfunction) {
+				case timingfunctions.WAVES_IN:
+					_this.config.direction = directions.ALTERNATE;
+				case timingfunctions.ELASTIC:
+					_end = [1, 0];
+				case timingfunctions.LINEAR:
+				case timingfunctions.EASE:
+				case timingfunctions.EASE_IN:
+				case timingfunctions.EASE_OUT:
+				case timingfunctions.EASE_IN_OUT:
+					points = typicpoints[_this.config.timingfunction];
+					break;
+				case timingfunctions.CUBIC_BEZIER:
+					if (_this.config.points) {
+						points = _this.config.points;
 					}
-				}
-				
-				if (typeof oneach === 'function') {
-					if (prop.to === undefined) {
-						oneach(name, prop.from);
-					} else {
-						var exacttimeratio = (timeratio - prop.fr) / (prop.tr - prop.fr),
-							points = _getPoints(property['timing-function']),
-							shrinked = _bezierShrink(points, exacttimeratio),
-							valueratio = shrinked[0].y,
-							finalvalue = prop.from + (prop.to - prop.from) * valueratio;
-						oneach(name, finalvalue);
-					}
-				}
-			});
-		};
-		
-		function _getTimeRatio(time) {
-			if (_this.duration === 0) {
-				return 1;
-			}
-			if (time <= _this.delay) {
-				return 0;
-			}
-			
-			var actualtime = time - _this.delay;
-			if (actualtime >= _this['iteration-count'] * _this.duration) {
-				return (_this.direction === 'alternate' ? (Math.ceil(actualtime / _this.duration) % 2) : 1);
-			}
-			
-			var ratio = (actualtime % _this.duration) / _this.duration;
-			return _this.direction === 'alternate' && !(Math.ceil(actualtime / _this.duration) % 2) ? 1 - ratio : ratio;
-		}
-		
-		function _bezierShrink(points, ratio) {
-			if (!points || points.length < 2) {
-				return 1;
-			}
-			
-			var shrinked = [];
-			for (var i = 1; i < points.length; i++) {
-				var m = points[i - 1];
-				var n = points[i];
-				shrinked.push(p(m.x + (n.x - m.x) * ratio, m.y + (n.y - m.y) * ratio));
-			}
-			if (shrinked.length > 1) {
-				shrinked = _bezierShrink(shrinked, ratio);
-			}
-			return shrinked;
-		}
-		
-		function _getPoints(timingfn) {
-			if (!timingfn) {
-				timingfn = _this['timing-function'];
-			}
-			var points;
-			switch (timingfn) {
-				case timingfunction.LINEAR:
-					points = [p(0, 0), p(1, 1)];
-					break;
-				case timingfunction.EASE:
-					points = [p(0, 0), p(0.25, 0.1), p(0.25, 1), p(1, 1)];
-					break;
-				case timingfunction.EASE_IN:
-					points = [p(0, 0), p(0.42, 0), p(1, 1)];
-					break;
-				case timingfunction.EASE_OUT:
-					points = [p(0, 0), p(0.58, 1), p(1, 1)];
-					break;
-				case timingfunction.EASE_IN_OUT:
-					points = [p(0, 0), p(0.42, 0), p(0.58, 1), p(1, 1)];
-					break;
-				case timingfunction.ELASTIC:
-					points = [p(0, 0), p(0.5, 0.5), p(0.75, 1), p(0.85, 2), p(0.95, 1), p(0.97, 0.7), p(1, 1)];
-					break;
-				case timingfunction.WAVES_IN:
-					points = [p(0, 0), p(0.2, -0.5), p(0.4, 0.5), p(0.6, -0.5), p(1, 1)];
 					break;
 				default:
-					points = _points;
 					break;
 			}
-			return points;
+			_points = _start.concat(points, _end);
 		}
 		
-		_this.setPoints = function(points) {
-			_points = points;
+		_this.ease = function(time) {
+			if (_this.config.duration <= 0) {
+				return _points[_points.length - 1];
+			}
+			
+			if (time <= _this.config.delay) {
+				return _points[1];
+			}
+			
+			time -= _this.config.delay;
+			
+			var count = Math.ceil((time ? time : 1) / _this.config.duration);
+			
+			if (_this.config.iterationcount != infinite && time >= _this.config.iterationcount * _this.config.duration) {
+				if (_this.config.direction == directions.ALTERNATE && _this.config.iterationcount % 2 == 1) {
+					return _points[_points.length - 1];
+				}
+				
+				return _points[1];
+			}
+			
+			var ms = time % _this.config.duration;
+			var ratio = ms / _this.config.duration;
+			if (_this.config.direction == directions.ALTERNATE && (count % 2 == 0 || time == _this.config.duration)) {
+				ratio = 1 - ratio;
+			}
+			
+			var point = _bezierShrink(_points, ratio);
+			if (_this.config.timingfunction == timingfunctions.ELASTIC && count > 2) {
+				var n = Math.ceil((count - 2) / 2);
+				var f = (1 - _this.config.factor) ^ n;
+				point[1] *= f;
+			}
+			
+			return point[1];
 		};
+		
+		function _bezierShrink(points, ratio) {
+			if (utils.typeOf(points) != 'array' || points.length < 4) {
+				throw 'Failed to shrink bezier points: Bad array!';
+				return;
+			}
+			
+			var arr = [];
+			for (var i = 0; i < points.length; i++) {
+				var x0 = points[i++];
+				var y0 = points[i++];
+				var x1 = points[i++];
+				var y1 = points[i];
+				
+				arr.push(x0 + (x1 - x0) * ratio);
+				arr.push(y0 + (y1 - y0) * ratio);
+			}
+			
+			if (arr.length > 2) {
+				arr = _bezierShrink(arr, ratio);
+			}
+			
+			return arr;
+		}
 		
 		_init();
 	};
+	
+	slicease.animation.timingfunctions = timingfunctions;
+	slicease.animation.directions = directions;
 })(slicease);
