@@ -85,11 +85,11 @@
 			var count = Math.ceil((time ? time : 1) / _this.config.duration);
 			
 			if (_this.config.iterationcount != infinite && time >= _this.config.iterationcount * _this.config.duration) {
-				if (_this.config.direction == directions.ALTERNATE && _this.config.iterationcount % 2 == 1) {
-					return _points[_points.length - 1];
+				if (_this.config.direction == directions.ALTERNATE && _this.config.iterationcount % 2 == 0) {
+					return _points[1];
 				}
 				
-				return _points[1];
+				return _points[_points.length - 1];
 			}
 			
 			var ms = time % _this.config.duration;

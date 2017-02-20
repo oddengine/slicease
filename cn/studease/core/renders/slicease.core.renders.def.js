@@ -52,7 +52,12 @@
 			_aTextureCoord,
 			_verticesBuffer,
 			_verticesTextureCoordBuffer,
-			_verticesIndexBuffer;
+			_verticesFrontIndexBuffer,
+			_verticesBackIndexBuffer,
+			_verticesTopIndexBuffer,
+			_verticesBottomIndexBuffer,
+			_verticesLeftIndexBuffer,
+			_verticesRightIndexBuffer;
 		
 		function _init() {
 			_this.name = rendermodes.DEFAULT;
@@ -144,7 +149,12 @@
 		function _initBuffers() {
 			_verticesBuffer = _webgl.createBuffer();
 			_verticesTextureCoordBuffer = _webgl.createBuffer();
-			_verticesIndexBuffer = _webgl.createBuffer();
+			_verticesFrontIndexBuffer = _webgl.createBuffer();
+			_verticesBackIndexBuffer = _webgl.createBuffer();
+			_verticesTopIndexBuffer = _webgl.createBuffer();
+			_verticesBottomIndexBuffer = _webgl.createBuffer();
+			_verticesLeftIndexBuffer = _webgl.createBuffer();
+			_verticesRightIndexBuffer = _webgl.createBuffer();
 		}
 		
 		_this.play = function(index) {
@@ -256,8 +266,25 @@
 				16, 17, 18,    16, 18, 19, // left
 				20, 21, 22,    20, 22, 23  // right
 			];
-			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesIndexBuffer);
-			_webgl.bufferData(_webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertexIndices), _webgl.STATIC_DRAW);
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesFrontIndexBuffer);
+			_webgl.bufferData(_webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertexIndices.slice(0, 6)), _webgl.STATIC_DRAW);
+			
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesBackIndexBuffer);
+			_webgl.bufferData(_webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertexIndices.slice(6, 12)), _webgl.STATIC_DRAW);
+			
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesTopIndexBuffer);
+			_webgl.bufferData(_webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertexIndices.slice(12, 18)), _webgl.STATIC_DRAW);
+			
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesBottomIndexBuffer);
+			_webgl.bufferData(_webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertexIndices.slice(18, 24)), _webgl.STATIC_DRAW);
+			
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesLeftIndexBuffer);
+			_webgl.bufferData(_webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertexIndices.slice(24, 30)), _webgl.STATIC_DRAW);
+			
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesRightIndexBuffer);
+			_webgl.bufferData(_webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertexIndices.slice(30, 36)), _webgl.STATIC_DRAW);
+			
+			_setMatrixUniforms(index, total, wth);
 			
 			var curr;
 			if (_oldIndex >= 0) {
@@ -265,17 +292,25 @@
 				_webgl.activeTexture(curr);
 				_webgl.bindTexture(_webgl.TEXTURE_2D, _textures[_oldIndex]);
 				_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, "uSampler"), _oldIndex);
+				_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesFrontIndexBuffer);
+				_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
+			} else {
+				
 			}
 			
 			var next = _webgl['TEXTURE' + _newIndex];
 			_webgl.activeTexture(next);
 			_webgl.bindTexture(_webgl.TEXTURE_2D, _textures[_newIndex]);
 			_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, "uSampler"), _newIndex);
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesTopIndexBuffer);
+			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			
-			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesIndexBuffer);
 			
+		}
+		
+		function _setMatrixUniforms(index, total, width) {
 			_animationZ.config.delay = _animationR.config.delay = index * 200;
-			var x = (1 - total + index * 2) * wth;
+			var x = (1 - total + index * 2) * width;
 			var z = _animationZ.ease(_timer.currentCount() * _timer.delay) * -10;
 			var r = _animationR.ease(_timer.currentCount() * _timer.delay) * Math.PI / 2;
 			
@@ -290,8 +325,6 @@
 			mat4.perspective(projectionMatrix, Math.PI / 6, _canvas.width / _canvas.height, 0.1, 100);
 			var uProjectionMatrix = _webgl.getUniformLocation(_shaderProgram, "uProjectionMatrix");
 			_webgl.uniformMatrix4fv(uProjectionMatrix, false, projectionMatrix);
-			
-			_webgl.drawElements(_webgl.TRIANGLES, 36, _webgl.UNSIGNED_SHORT, 0);
 		}
 		
 		function _onLoaderComplete(e) {
@@ -316,9 +349,7 @@
 				_webgl.texParameteri(_webgl.TEXTURE_2D, _webgl.TEXTURE_WRAP_T, _webgl.CLAMP_TO_EDGE);
 			}
 			
-			if (_newIndex == 2) {
-				_webgl.bindTexture(_webgl.TEXTURE_2D, null);
-			}
+			_webgl.bindTexture(_webgl.TEXTURE_2D, null);
 		}
 		
 		function _isPowerOf2(uint) {
