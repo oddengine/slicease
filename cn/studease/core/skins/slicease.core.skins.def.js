@@ -31,6 +31,8 @@
 		function _init() {
 			_this.name = skinmodes.DEFAULT;
 			
+			SKIN_CLASS += '-' + _this.name;
+			
 			css('.' + WRAP_CLASS, {
 				width: _width + 'px',
 				height: _height + 'px',
@@ -45,12 +47,15 @@
 				'box-sizing': 'content-box'
 			});
 			
-			css('.' + RENDER_CLASS, {
-				width: _width - 2 + 'px',
-				height: _height - 2 + 'px',
-				border: '1px solid #1184ce',
-				'border-radius': '4px',
+			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS, {
+				width: CSS_100PCT,
+				height: CSS_100PCT,
+				//border: '1px solid #1184ce',
+				//'border-radius': '4px',
 				position: CSS_RELATIVE
+			});
+			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS + ' canvas', {
+				'background-color': '#585862'
 			});
 		}
 		

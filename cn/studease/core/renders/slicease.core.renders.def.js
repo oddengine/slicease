@@ -11,22 +11,36 @@
 	
 	var VERTEX_SHADER_SOURCE = ''
 			+ 'attribute vec3 aVertexPosition;'
+			+ 'attribute vec4 aVertexColor;'
 			+ 'attribute vec2 aTextureCoord;'
+			+ 'attribute vec3 aVertexNormal;'
+			
 			+ 'uniform mat4 uModelViewMatrix;'
 			+ 'uniform mat4 uProjectionMatrix;'
+			+ 'uniform mat4 uNormalMatrix;'
+			
+			+ 'varying [precision] vec4 vVertexColor;'
 			+ 'varying [precision] vec2 vTextureCoord;'
+			+ 'varying [precision] vec3 vLighting;'
 			
 			+ 'void main() {'
 			+ ' gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0);'
+			+ ' vVertexColor = aVertexColor;'
 			+ ' vTextureCoord = aTextureCoord;'
 			+ '}';
 	
 	var FRAGMENT_SHADER_SOURCE = ''
+			+ 'varying [precision] vec4 vVertexColor;'
 			+ 'varying [precision] vec2 vTextureCoord;'
+			+ 'uniform bool uUseTextures;'
 			+ 'uniform sampler2D uSampler;'
 			
 			+ 'void main() {'
-			+ ' gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));'
+			+ ' if (uUseTextures) {'
+			+ '  gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));'
+			+ ' } else {'
+			+ '  gl_FragColor = vVertexColor;'
+			+ ' }'
 			+ '}';
 	
 	renders.def = function(view, config) {
@@ -49,8 +63,11 @@
 			_fragmentShader,
 			_vertexShader,
 			_aVertexPosition,
+			_avertexNormal,
+			_aVertexColor,
 			_aTextureCoord,
 			_verticesBuffer,
+			_verticesColorsBuffer,
 			_verticesTextureCoordBuffer,
 			_verticesFrontIndexBuffer,
 			_verticesBackIndexBuffer,
@@ -64,8 +81,8 @@
 			
 			_this.config = utils.extend({}, _defaults, config);
 			
-			VERTEX_SHADER_SOURCE = VERTEX_SHADER_SOURCE.replace(/\[precision\]/, _this.config.precision);
-			FRAGMENT_SHADER_SOURCE = FRAGMENT_SHADER_SOURCE.replace(/\[precision\]/, _this.config.precision);
+			VERTEX_SHADER_SOURCE = VERTEX_SHADER_SOURCE.replace(/\[precision\]/g, _this.config.precision);
+			FRAGMENT_SHADER_SOURCE = FRAGMENT_SHADER_SOURCE.replace(/\[precision\]/g, _this.config.precision);
 			
 			_loader = new utils.imageloader();
 			_loader.addEventListener(events.SLICEASE_COMPLETE, _onLoaderComplete);
@@ -92,7 +109,7 @@
 			
 			_webgl = _canvas.getContext("webgl") || _canvas.getContext("experimental-webgl");
 			_webgl.viewport(0, 0, _canvas.width, _canvas.height);
-			_webgl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+			//_webgl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
 			_webgl.clearDepth(1.0);                 // Clear everything
 			_webgl.enable(_webgl.DEPTH_TEST);       // Enable depth testing
 			_webgl.enable(_webgl.CULL_FACE);
@@ -142,12 +159,16 @@
 			_aVertexPosition = _webgl.getAttribLocation(_shaderProgram, "aVertexPosition");
 			_webgl.enableVertexAttribArray(_aVertexPosition);
 			
+			_aVertexColor = _webgl.getAttribLocation(_shaderProgram, "aVertexColor");
+			_webgl.enableVertexAttribArray(_aVertexColor);
+			
 			_aTextureCoord = _webgl.getAttribLocation(_shaderProgram, "aTextureCoord");
 			_webgl.enableVertexAttribArray(_aTextureCoord);
 		}
 		
 		function _initBuffers() {
 			_verticesBuffer = _webgl.createBuffer();
+			_verticesColorsBuffer = _webgl.createBuffer();
 			_verticesTextureCoordBuffer = _webgl.createBuffer();
 			_verticesFrontIndexBuffer = _webgl.createBuffer();
 			_verticesBackIndexBuffer = _webgl.createBuffer();
@@ -219,6 +240,14 @@
 			_webgl.bufferData(_webgl.ARRAY_BUFFER, new Float32Array(vertices), _webgl.STATIC_DRAW);
 			_webgl.vertexAttribPointer(_aVertexPosition, 3, _webgl.FLOAT, false, 0, 0);
 			
+			var colors = [];
+			for (var i = 0; i < 24; i++) {
+				colors = colors.concat(_this.config.profile);
+			}
+			_webgl.bindBuffer(_webgl.ARRAY_BUFFER, _verticesColorsBuffer);
+			_webgl.bufferData(_webgl.ARRAY_BUFFER, new Float32Array(colors), _webgl.STATIC_DRAW);
+			_webgl.vertexAttribPointer(_aVertexColor, 4, _webgl.FLOAT, false, 0, 0);
+			
 			var per = 1 / total;
 			var sta = index * per;
 			var end = (index + 1) * per;
@@ -288,6 +317,8 @@
 			
 			var curr;
 			if (_oldIndex >= 0) {
+				_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, 'uUseTextures'), true);
+				
 				curr = _webgl['TEXTURE' + _oldIndex];
 				_webgl.activeTexture(curr);
 				_webgl.bindTexture(_webgl.TEXTURE_2D, _textures[_oldIndex]);
@@ -295,8 +326,13 @@
 				_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesFrontIndexBuffer);
 				_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			} else {
+				_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, 'uUseTextures'), false);
 				
+				_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesFrontIndexBuffer);
+				_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			}
+			
+			_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, 'uUseTextures'), true);
 			
 			var next = _webgl['TEXTURE' + _newIndex];
 			_webgl.activeTexture(next);
@@ -305,7 +341,16 @@
 			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesTopIndexBuffer);
 			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			
+			_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, 'uUseTextures'), false);
 			
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesBackIndexBuffer);
+			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesBottomIndexBuffer);
+			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesLeftIndexBuffer);
+			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesRightIndexBuffer);
+			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 		}
 		
 		function _setMatrixUniforms(index, total, width) {

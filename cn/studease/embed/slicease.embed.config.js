@@ -14,12 +14,13 @@
 			width: 640,
 			height: 360,
 			sources: [],
-			range: '3-10',
+			range: '3-9',
 			controls: true,
 			interval: 5000,
 			render: {
 				name: rendermodes.DEFAULT,
-				precision: precisions.HIGH_P
+				precision: precisions.HIGH_P,
+				profile: [0.6, 0.6, 0.6, 1.0]
 			},
 			skin: {
 				name: skinmodes.DEFAULT

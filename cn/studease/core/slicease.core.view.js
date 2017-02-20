@@ -39,7 +39,7 @@
 			_errorOccurred = false;
 		
 		function _init() {
-			_wrapper = utils.createElement('div', WRAP_CLASS + ',' + SKIN_CLASS + '-' + model.config.skin.name);
+			_wrapper = utils.createElement('div', WRAP_CLASS + ' ' + SKIN_CLASS + '-' + model.config.skin.name);
 			_wrapper.id = entity.id;
 			_wrapper.tabIndex = 0;
 			
@@ -96,7 +96,7 @@
 			});
 			
 			try {
-				_skin = new skins[cfg.name](_this, cfg);
+				_skin = new skins[cfg.name](cfg);
 			} catch (e) {
 				utils.log('Failed to init skin ' + cfg.name + '!');
 			}
