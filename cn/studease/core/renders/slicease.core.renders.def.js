@@ -13,34 +13,46 @@
 			+ 'attribute vec3 aVertexPosition;'
 			+ 'attribute vec4 aVertexColor;'
 			+ 'attribute vec2 aTextureCoord;'
-			+ 'attribute vec3 aVertexNormal;'
+			//+ 'attribute vec3 aVertexNormal;'
 			
 			+ 'uniform mat4 uModelViewMatrix;'
 			+ 'uniform mat4 uProjectionMatrix;'
-			+ 'uniform mat4 uNormalMatrix;'
+			//+ 'uniform mat4 uNormalMatrix;'
 			
 			+ 'varying [precision] vec4 vVertexColor;'
 			+ 'varying [precision] vec2 vTextureCoord;'
-			+ 'varying [precision] vec3 vLighting;'
+			//+ 'varying [precision] vec3 vLighting;'
 			
 			+ 'void main() {'
-			+ ' gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0);'
-			+ ' vVertexColor = aVertexColor;'
-			+ ' vTextureCoord = aTextureCoord;'
+			+ '  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0);'
+			+ '  vVertexColor = aVertexColor;'
+			+ '  vTextureCoord = aTextureCoord;'
+			
+			//+ '  vec3 ambientLight = vec3(1.0, 1.0, 1.0);'
+			//+ '  vec3 directionalLightColor = vec3(1.0, 1.0, 1.0);'
+			//+ '  vec3 directionalVector = vec3(0.0, -1.0, 0.0);'
+			//+ '  vec4 transformedNormal = uNormalMatrix * vec4(aVertexNormal, 1.0);'
+			//+ '  float directional = max(dot(transformedNormal.xyz, directionalVector), 0.0);'
+			//+ '  vLighting = ambientLight + (directionalLightColor * directional);'
 			+ '}';
 	
 	var FRAGMENT_SHADER_SOURCE = ''
+			+ 'precision [precision] float;'
 			+ 'varying [precision] vec4 vVertexColor;'
 			+ 'varying [precision] vec2 vTextureCoord;'
+			//+ 'varying [precision] vec3 vLighting;'
 			+ 'uniform bool uUseTextures;'
 			+ 'uniform sampler2D uSampler;'
 			
 			+ 'void main() {'
-			+ ' if (uUseTextures) {'
-			+ '  gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));'
-			+ ' } else {'
-			+ '  gl_FragColor = vVertexColor;'
-			+ ' }'
+			+ '  vec4 normalColor;'
+			+ '  if (uUseTextures) {'
+			+ '    normalColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));'
+			+ '  } else {'
+			+ '    normalColor = vVertexColor;'
+			+ '  }'
+			+ '  gl_FragColor = normalColor;'
+			//+ '  gl_FragColor = vec4(normalColor.rgb * vLighting, normalColor.a);'
 			+ '}';
 	
 	renders.def = function(view, config) {
@@ -54,8 +66,8 @@
 			_loader,
 			_timer,
 			_textures,
-			_animationZ,
-			_animationR,
+			_animation,
+			_animations,
 			
 			_canvas,
 			_webgl,
@@ -63,12 +75,13 @@
 			_fragmentShader,
 			_vertexShader,
 			_aVertexPosition,
-			_avertexNormal,
+			//_aVertexNormal,
 			_aVertexColor,
 			_aTextureCoord,
 			_verticesBuffer,
 			_verticesColorsBuffer,
 			_verticesTextureCoordBuffer,
+			//_verticesNormalBuffer,
 			_verticesFrontIndexBuffer,
 			_verticesBackIndexBuffer,
 			_verticesTopIndexBuffer,
@@ -88,17 +101,51 @@
 			_loader.addEventListener(events.SLICEASE_COMPLETE, _onLoaderComplete);
 			_loader.addEventListener(events.ERROR, _onLoaderError);
 			
-			_animationZ = new animation({
-				duration: 600,
-				timingfunction: animation.timingfunctions.EASE_OUT,
-				iterationcount: 2,
-				direction: animation.directions.ALTERNATE
-			});
+			_animations = [{
+				z: new animation({
+					duration: 1000,
+					timingfunction: animation.timingfunctions.ELASTIC
+				}),
+				r: new animation({
+					duration: 1200,
+					timingfunction: animation.timingfunctions.CUBIC_BEZIER,
+					points: [0.24, -0.58, 0.58, 2.0, 0.82, 0.58]
+				})
+			}, {
+				z: new animation({
+					duration: 1000,
+					timingfunction: animation.timingfunctions.WAVES_IN
+				}),
+				r: new animation({
+					duration: 1000,
+					timingfunction: animation.timingfunctions.CUBIC_BEZIER,
+					points: [0.24, -0.58, 0.82, 1.0]
+				})
+			}, {
+				z: new animation({
+					duration: 400,
+					timingfunction: animation.timingfunctions.EASE_IN_OUT,
+					iterationcount: 2,
+					direction: directions.ALTERNATE
+				}),
+				r: new animation({
+					duration: 1000,
+					timingfunction: animation.timingfunctions.CUBIC_BEZIER,
+					points: [0.42, 2.0, 0.84, 0.5]
+				})
+			}];
+			_animations.index = -1;
 			
-			_animationR = new animation({
-				duration: 1200,
-				timingfunction: animation.timingfunctions.EASE_IN_OUT
-			});
+			_animation = {
+				z: new animation({
+					duration: 500,
+					timingfunction: animation.timingfunctions.EASE_IN
+				}),
+				r: new animation({
+					duration: 500,
+					timingfunction: animation.timingfunctions.EASE_IN
+				})
+			};
 			
 			_canvas = utils.createElement('canvas');
 			_canvas.innerHTML = '<a>Canvas not supported! </a>'
@@ -164,12 +211,17 @@
 			
 			_aTextureCoord = _webgl.getAttribLocation(_shaderProgram, "aTextureCoord");
 			_webgl.enableVertexAttribArray(_aTextureCoord);
+			
+			//_aVertexNormal = _webgl.getAttribLocation(_shaderProgram, "aVertexNormal");
+			//_webgl.enableVertexAttribArray(_aVertexNormal);
 		}
 		
 		function _initBuffers() {
 			_verticesBuffer = _webgl.createBuffer();
 			_verticesColorsBuffer = _webgl.createBuffer();
 			_verticesTextureCoordBuffer = _webgl.createBuffer();
+			//_verticesNormalBuffer = _webgl.createBuffer();
+			
 			_verticesFrontIndexBuffer = _webgl.createBuffer();
 			_verticesBackIndexBuffer = _webgl.createBuffer();
 			_verticesTopIndexBuffer = _webgl.createBuffer();
@@ -192,6 +244,19 @@
 			_running = true;
 			_oldIndex = _newIndex;
 			_newIndex = index;
+			
+			_pieces = _range[0] + Math.round(Math.random() * (_range[1] - _range[0]));
+			if (_pieces == 8) { // Skipping scratch
+				_pieces++;
+			}
+			
+			var animationIndex = _animations.index++;
+			if (animationIndex >= 0) {
+				_animation = _animations[animationIndex];
+				if (_animations.index == _animations.length) {
+					_animations.index = 0;
+				}
+			}
 			
 			var next = _webgl['TEXTURE' + _newIndex];
 			if (_oldIndex < 0 || _textures[_newIndex] == undefined) {
@@ -239,7 +304,43 @@
 			_webgl.bindBuffer(_webgl.ARRAY_BUFFER, _verticesBuffer);
 			_webgl.bufferData(_webgl.ARRAY_BUFFER, new Float32Array(vertices), _webgl.STATIC_DRAW);
 			_webgl.vertexAttribPointer(_aVertexPosition, 3, _webgl.FLOAT, false, 0, 0);
-			
+			/*
+			var vertexNormals = [
+				// Front
+				 0.0,  0.0,  1.0,
+				 0.0,  0.0,  1.0,
+				 0.0,  0.0,  1.0,
+				 0.0,  0.0,  1.0,
+				// Back
+				 0.0,  0.0, -1.0,
+				 0.0,  0.0, -1.0,
+				 0.0,  0.0, -1.0,
+				 0.0,  0.0, -1.0,
+				// Top
+				 0.0,  1.0,  0.0,
+				 0.0,  1.0,  0.0,
+				 0.0,  1.0,  0.0,
+				 0.0,  1.0,  0.0,
+				// Bottom
+				 0.0, -1.0,  0.0,
+				 0.0, -1.0,  0.0,
+				 0.0, -1.0,  0.0,
+				 0.0, -1.0,  0.0,
+				// Left
+				-1.0,  0.0,  0.0,
+				-1.0,  0.0,  0.0,
+				-1.0,  0.0,  0.0,
+				-1.0,  0.0,  0.0,
+				// Right
+				 1.0,  0.0,  0.0,
+				 1.0,  0.0,  0.0,
+				 1.0,  0.0,  0.0,
+				 1.0,  0.0,  0.0
+			];
+			_webgl.bindBuffer(_webgl.ARRAY_BUFFER, _verticesNormalBuffer);
+			_webgl.bufferData(_webgl.ARRAY_BUFFER, new Float32Array(vertexNormals), _webgl.STATIC_DRAW);
+			_webgl.vertexAttribPointer(_aVertexNormal, 3, _webgl.FLOAT, false, 0, 0);
+			*/
 			var colors = [];
 			for (var i = 0; i < 24; i++) {
 				colors = colors.concat(_this.config.profile);
@@ -354,10 +455,18 @@
 		}
 		
 		function _setMatrixUniforms(index, total, width) {
-			_animationZ.config.delay = _animationR.config.delay = index * 200;
+			_animation.z.config.delay = _animation.r.config.delay = index * 100;
+			
+			var time = _timer.currentCount() * _timer.delay;
+			var ratioZ = _animation.z.animate(time);
+			var ratioR = _animation.r.animate(time);
 			var x = (1 - total + index * 2) * width;
-			var z = _animationZ.ease(_timer.currentCount() * _timer.delay) * -10;
-			var r = _animationR.ease(_timer.currentCount() * _timer.delay) * Math.PI / 2;
+			var z = ratioZ * -10;
+			var r = ratioR * Math.PI / 2;
+			if (_oldIndex < 0) {
+				z = -10 + ratioZ * 10;
+				r = Math.PI / 4 * (1 + ratioR);
+			}
 			
 			var modelViewMatrix = mat4.create();
 			mat4.lookAt(modelViewMatrix, [0, 0, 12], [0, 0, 0], [0, 1, 0]);
@@ -394,7 +503,9 @@
 				_webgl.texParameteri(_webgl.TEXTURE_2D, _webgl.TEXTURE_WRAP_T, _webgl.CLAMP_TO_EDGE);
 			}
 			
-			_webgl.bindTexture(_webgl.TEXTURE_2D, null);
+			if (_newIndex == _pieces - 1) {
+				_webgl.bindTexture(_webgl.TEXTURE_2D, null);
+			}
 		}
 		
 		function _isPowerOf2(uint) {
@@ -410,9 +521,7 @@
 		}
 		
 		function _startTimer() {
-			_pieces = _range[0] + Math.round(Math.random() * (_range[1] - _range[0]));
-			
-			_this.dispatchEvent(events.SLICEASE_RENDER_UPDATE_START, { pieces: _pieces });
+			_this.dispatchEvent(events.SLICEASE_RENDER_UPDATE_START);
 			
 			if (!_timer) {
 				_timer = new utils.timer(15);
@@ -435,7 +544,7 @@
 				_drawCube(i, _pieces);
 			}
 			
-			if (_timer.currentCount() * _timer.delay >= 1200 + (_pieces - 1) * 200) {
+			if (_timer.currentCount() * _timer.delay >= _animation.r.config.duration + (_pieces - 1) * 100) {
 				_stopTimer();
 				_running = false;
 				_this.dispatchEvent(events.SLICEASE_RENDER_UPDATE_END);
