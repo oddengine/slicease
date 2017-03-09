@@ -35,8 +35,7 @@
 			
 			css('.' + WRAP_CLASS, {
 				width: _width + 'px',
-				height: _height + 'px',
-				'box-shadow': '0 1px 1px rgba(0, 0, 0, 0.05)'
+				height: _height + 'px'
 			});
 			css('.' + WRAP_CLASS + ' *', {
 				margin: '0',
@@ -50,8 +49,6 @@
 			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS, {
 				width: CSS_100PCT,
 				height: CSS_100PCT,
-				//border: '1px solid #1184ce',
-				//'border-radius': '4px',
 				position: CSS_RELATIVE
 			});
 			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS + ' canvas', {
