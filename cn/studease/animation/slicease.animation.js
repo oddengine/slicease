@@ -35,7 +35,7 @@
 	 			iterationcount: 1,
 	 			direction: directions.NORMAL,
 	 			points: undefined,
-	 			factor: 0
+	 			factor: .2
 			},
 			_start,
 			_end,
@@ -71,7 +71,7 @@
 			_points = _start.concat(points, _end);
 		}
 		
-		_this.animate = function(time) {
+		_this.ease = function(time) {
 			if (_this.config.duration <= 0) {
 				return _points[_points.length - 1];
 			}
@@ -115,17 +115,14 @@
 			}
 			
 			var arr = [];
-			var x0 = points[0];
-			var y0 = points[1];
-			for (var i = 2; i < points.length; i++) {
+			for (var i = 0; i < points.length; i++) {
+				var x0 = points[i++];
+				var y0 = points[i++];
 				var x1 = points[i++];
 				var y1 = points[i];
 				
 				arr.push(x0 + (x1 - x0) * ratio);
 				arr.push(y0 + (y1 - y0) * ratio);
-				
-				x0 = x1;
-				y0 = y1;
 			}
 			
 			if (arr.length > 2) {

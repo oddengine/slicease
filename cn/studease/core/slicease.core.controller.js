@@ -105,12 +105,12 @@
 		}
 		
 		function _onUpdateStart(e) {
-			//utils.log('onUpdateStart');
+			utils.log('onUpdateStart');
 			model.setState(states.PLAYING);
 		}
 		
 		function _onUpdateEnd(e) {
-			//utils.log('onUpdateEnd');
+			utils.log('onUpdateEnd');
 			model.setState(states.IDLE);
 			_startTimer();
 		}

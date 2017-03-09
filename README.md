@@ -17,7 +17,7 @@ The example below will find the element with an id of sli-box and render a slice
 slicease('slicer').setup({
 	width: 1200,
 	height: 500,
-	sources: ['images/img1.png', 'images/img2.png', 'images/img3.png'],
+	sources: ['images/img1.png', 'images/img2.png', 'images/img3.png', 'images/img4.png'],
 	range: '3-9'
 });
 ```
