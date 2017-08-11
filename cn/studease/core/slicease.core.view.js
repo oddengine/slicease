@@ -41,7 +41,7 @@
 		function _init() {
 			_wrapper = utils.createElement('div', WRAP_CLASS + ' ' + SKIN_CLASS + '-' + model.config.skin.name);
 			_wrapper.id = entity.id;
-			_wrapper.tabIndex = 0;
+			//_wrapper.tabIndex = 0;
 			
 			_renderLayer = utils.createElement('div', RENDER_CLASS);
 			_posterLayer = utils.createElement('div', POSTER_CLASS);
