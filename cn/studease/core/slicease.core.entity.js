@@ -13,7 +13,7 @@
 			_this.id = config.id;
 			
 			_this.model = _model = new core.model(config);
-			_this.view = _view = new core.view(_this, _model);
+			_this.view = _view = new core.view(_model);
 			_this.controller = _controller = new core.controller(_model, _view);
 			
 			_controller.addGlobalListener(_forward);
@@ -34,8 +34,8 @@
 		
 		_this.setup = function() {
 			setTimeout(function() {
-				_view.setup();
-			}, 0);
+				_controller.setup();
+			});
 		};
 		
 		function _forward(e) {

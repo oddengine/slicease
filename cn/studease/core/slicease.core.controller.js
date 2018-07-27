@@ -14,7 +14,9 @@
 			model.addEventListener(events.SLICEASE_STATE, _modelStateHandler);
 			
 			view.addEventListener(events.SLICEASE_READY, _onReady);
+			view.addEventListener(events.SLICEASE_STATE, _renderStateHandler);
 			view.addEventListener(events.SLICEASE_SETUP_ERROR, _onSetupError);
+			view.addEventListener(events.RESIZE, _forward);
 			
 			view.addEventListener(events.SLICEASE_VIEW_PLAY, _onPlay);
 			view.addEventListener(events.SLICEASE_VIEW_STOP, _onStop);
@@ -25,38 +27,6 @@
 			view.addEventListener(events.SLICEASE_RENDER_UPDATE_END, _onUpdateEnd);
 			view.addEventListener(events.SLICEASE_RENDER_ERROR, _onRenderError);
 		}
-		
-		_this.play = function(index) {
-			if (index === undefined) {
-				_this.next();
-				return;
-			}
-			
-			_index = Math.min(Math.max(index, 0), model.config.sources.length - 1);
-			view.render.play(_index);
-		};
-		
-		_this.stop = function() {
-			_loader.stop();
-			_stopTimer();
-			
-			model.setState(states.STOPPED);
-			view.render.stop();
-		};
-		
-		_this.prev = function() {
-			if (_index-- === 0) {
-				_index = model.config.sources.length - 1;
-			}
-			view.render.play(_index);
-		};
-		
-		_this.next = function() {
-			if (_index++ === model.config.sources.length - 1) {
-				_index = 0;
-			}
-			view.render.play(_index);
-		};
 		
 		function _modelStateHandler(e) {
 			switch (e.state) {
@@ -85,23 +55,83 @@
 			}
 		}
 		
+		_this.setup = function(e) {
+			if (!_ready) {
+				view.setup();
+			}
+		};
+		
+		_this.play = function(index) {
+			if (index == undefined) {
+				_this.next();
+				return;
+			}
+			
+			index = Math.min(Math.max(index, 0), model.getConfig('sources').length - 1);
+			var converse = index < _index;
+			
+			if (view.play(index, converse)) {
+				_index = index;
+			}
+		};
+		
+		_this.stop = function() {
+			_loader.stop();
+			_stopTimer();
+			
+			model.setState(states.STOPPED);
+			view.stop();
+		};
+		
+		_this.prev = function() {
+			var index = _index - 1;
+			if (index < 0) {
+				index = model.getConfig('sources').length - 1;
+			}
+			
+			if (view.play(index, true)) {
+				_index = index;
+			}
+		};
+		
+		_this.next = function() {
+			var index = _index + 1;
+			if (index > model.getConfig('sources').length - 1) {
+				index = 0;
+			}
+			
+			if (view.play(index, false)) {
+				_index = index;
+			}
+		};
+		
+		
+		function _renderStateHandler(e) {
+			model.setState(e.state);
+			_forward(e);
+		}
+		
 		function _onPlay(e) {
 			var state = model.getState();
-			if (state !== states.PLAYING) {
+			if (state != states.PLAYING) {
 				_this.play(e.index);
+				_forward(e);
 			}
 		}
 		
 		function _onStop(e) {
 			_this.stop();
+			_forward(e);
 		}
 		
 		function _onPrev(e) {
 			_this.prev();
+			_forward(e);
 		}
 		
 		function _onNext(e) {
 			_this.next();
+			_forward(e);
 		}
 		
 		function _onUpdateStart(e) {
@@ -117,7 +147,7 @@
 		
 		function _startTimer() {
 			if (!_timer) {
-				_timer = new utils.timer(model.config.interval, 1);
+				_timer = new utils.timer(model.getConfig('interval'), 1);
 				_timer.addEventListener(events.SLICEASE_TIMER, _onTimer);
 			}
 			
@@ -136,11 +166,17 @@
 		
 		function _onSetupError(e) {
 			model.setState(states.ERROR);
+			view.display(states.ERROR, e.message);
+			
+			_this.stop();
 			_forward(e);
 		}
 		
 		function _onRenderError(e) {
 			model.setState(states.ERROR);
+			view.display(states.ERROR, e.message);
+			
+			_this.stop();
 			_forward(e);
 		}
 		

@@ -15,10 +15,12 @@ The example below will find the element with an id of sli-box and render a slice
 
 ```js
 slicease('slicer').setup({
-	width: 1200,
-	height: 500,
+	width: 1000,
+	height: 460,
 	sources: ['images/img1.png', 'images/img2.png', 'images/img3.png', 'images/img4.png'],
-	range: '3-9'
+	range: '3-9',
+	cubic: '5,4',
+	distance: 12
 });
 ```
 
@@ -28,17 +30,24 @@ For more configurations, please check cn/studease/embed/slicease.embed.config.js
 _defaults = {
 	width: 640,
 	height: 360,
+	aspectratio: '',
 	sources: [],
 	range: '3-9',
-	controls: true,
+	cubic: '5,4',
+	distance: 12,
 	interval: 5000,
+	controls: true,
+	debug: false,
 	render: {
-		name: rendermodes.DEFAULT,
+		name: rendertypes.DEFAULT,
 		precision: precisions.HIGH_P,
 		profile: [0.6, 0.6, 0.6, 1.0]
 	},
 	skin: {
-		name: skinmodes.DEFAULT
+		name: skintypes.DEFAULT
+	},
+	events: {
+		
 	}
 }
 ```

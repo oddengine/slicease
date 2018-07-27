@@ -5,8 +5,8 @@
 	var embed = slicease.embed = function(api) {
 		var _this = utils.extend(this, new events.eventdispatcher('embed')),
 			_config = {},
-			_embedder = null,
-			_errorOccurred = false;
+			_errorOccurred = false,
+			_embedder = null;
 		
 		function _init() {
 			utils.foreach(api.config.events, function(e, cb) {
@@ -39,15 +39,22 @@
 			slicease.api.displayError(message, _config);
 		};
 		
+		_this.clearScreen = function() {
+			_errorOccurred = false;
+			slicease.api.displayError('', _config);
+		};
+		
 		function _onEvent(e) {
 			switch (e.type) {
 				case events.ERROR:
 				case events.SLICEASE_SETUP_ERROR:
 				case events.SLICEASE_RENDER_ERROR:
+					utils.log('[ERROR] ' + e.message);
 					_this.errorScreen(e.message);
 					_this.dispatchEvent(events.ERROR, e);
 					break;
 				default:
+					_this.clearScreen();
 					_forward(e);
 					break;
 			}

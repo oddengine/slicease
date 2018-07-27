@@ -4,7 +4,7 @@
 	}
 };
 
-slicease.version = '3.0.06';
+slicease.version = '3.0.07';
 
 (function(slicease) {
 	var utils = slicease.utils = {};
@@ -68,10 +68,55 @@ slicease.version = '3.0.06';
 		while (str.length < len) {
 			str = '0' + str;
 		}
+		
 		return str;
 	};
 	
+	utils.typeOf = function(value) {
+		if (value === null || value === undefined) {
+			return 'null';
+		}
+		
+		var typeofString = typeof value;
+		if (typeofString === 'object') {
+			try {
+				var str = Object.prototype.toString.call(value);
+				var arr = str.match(/^\[object ([a-z]+)\]$/i);
+				if (arr && arr.length > 1 && arr[1]) {
+					return arr[1].toLowerCase();
+				}
+			} catch (err) {
+				/* void */
+			}
+		}
+		
+		return typeofString;
+	};
 	
+	utils.isInt = function(value) {
+		return parseFloat(value) % 1 === 0;
+	};
+	
+	utils.trim = function(inputString) {
+		return inputString.replace(/^\s+|\s+$/g, '');
+	};
+	
+	utils.indexOf = function(array, item) {
+		if (array == null) {
+			return -1;
+		}
+		
+		for (var i = 0; i < array.length; i++) {
+			if (array[i] === item) {
+				return i;
+			}
+		}
+		
+		return -1;
+	};
+	
+	
+	/* DOM */
 	utils.createElement = function(elem, className) {
 		var newElement = document.createElement(elem);
 		if (className) {
@@ -93,9 +138,23 @@ slicease.version = '3.0.06';
 		element.className = utils.trim(originalClasses.join(' '));
 	};
 	
-	utils.removeClass = function(element, c) {
+	utils.hasClass = function(element, classes) {
+		var originalClasses = element.className || '';
+		var hasClasses = utils.typeOf(classes) === 'array' ? classes : classes.split(' ');
+		
+		for (var i = 0; i < hasClasses.length; i++) {
+			var re = new RegExp('\\b' + hasClasses[i] + '\\b', 'i');
+			if (originalClasses.search(re) == -1) {
+				return false;
+			}
+		}
+		
+		return true;
+	};
+	
+	utils.removeClass = function(element, classes) {
 		var originalClasses = utils.typeOf(element.className) === 'string' ? element.className.split(' ') : [];
-		var removeClasses = utils.typeOf(c) === 'array' ? c : c.split(' ');
+		var removeClasses = utils.typeOf(classes) === 'array' ? classes : classes.split(' ');
 		
 		utils.foreach(removeClasses, function(n, c) {
 			var index = utils.indexOf(originalClasses, c);
@@ -113,41 +172,75 @@ slicease.version = '3.0.06';
 		}
 	};
 	
-	utils.typeOf = function(value) {
-		if (value === null || value === undefined) {
-			return 'null';
-		}
-		var typeofString = typeof value;
-		if (typeofString === 'object') {
-			try {
-				if (toString.call(value) === '[object Array]') {
-					return 'array';
-				}
-			} catch (e) {}
-		}
-		return typeofString;
-	};
 	
-	utils.trim = function(inputString) {
-		return inputString.replace(/^\s+|\s+$/g, '');
-	};
-	
-	utils.indexOf = function(array, item) {
-		if (array == null) return -1;
-		for (var i = 0; i < array.length; i++) {
-			if (array[i] === item) {
-				return i;
-			}
-		}
-		return -1;
-	};
-	
+	/* Browser */
 	utils.isMSIE = function(version) {
-		if (version) {
-			version = parseFloat(version).toFixed(1);
-			return _userAgentMatch(new RegExp('msie\\s*' + version, 'i'));
+		version = version || '';
+		return _userAgentMatch(new RegExp('MSIE\\s*' + version, 'i'));
+	};
+	
+	utils.isIETrident = function() {
+		return _userAgentMatch(/trident\/.+rv:\s*11/i);
+	};
+	
+	utils.isEdge = function(version) {
+		version = version || '';
+		return _userAgentMatch(new RegExp('\\sEdge\\/' + version, 'i'));
+	};
+	
+	utils.isMac = function(version) {
+		version = version || '';
+		return _userAgentMatch(new RegExp('\\sMac OS X ' + version, 'i'));
+	};
+	
+	utils.isSafari = function(version) {
+		version = version || '';
+		return _userAgentMatch(new RegExp('\\sSafari\\/' + version, 'i'))
+				&& !_userAgentMatch(/Chrome/i) && !_userAgentMatch(/Chromium/i) && !_userAgentMatch(/Android/i);
+	};
+	
+	utils.isIOS = function(version) {
+		version = version || '';
+		return _userAgentMatch(new RegExp('iP(hone|ad|od).+\\sOS\\s' + version, 'i'));
+	};
+	
+	utils.isAndroid = function(version, excludeChrome) {
+		//Android Browser appears to include a user-agent string for Chrome/18
+		if (excludeChrome && _userAgentMatch(/Chrome\/[123456789]/i) && !_userAgentMatch(/Chrome\/18/)) {
+			return false;
 		}
-		return _userAgentMatch(/msie/i);
+		
+		version = version || '';
+		return _userAgentMatch(new RegExp('Android\\s*' + version, 'i'));
+	};
+	
+	utils.isMobile = function() {
+		return utils.isIOS() || utils.isAndroid();
+	};
+	
+	utils.isFirefox = function(version) {
+		version = version || '';
+		return _userAgentMatch(new RegExp('Firefox\\/' + version, 'i'));
+	};
+	
+	utils.isChrome = function(version) {
+		version = version || '';
+		return _userAgentMatch(new RegExp('\\s(?:Chrome|CriOS)\\/' + version, 'i')) && !utils.isEdge();
+	};
+	
+	utils.isSogou = function(version) {
+		version = version || '';
+		return _userAgentMatch(new RegExp('MetaSr\\s' + version, 'i'));
+	};
+	
+	utils.isWeixin = function(version) {
+		version = version || '';
+		return _userAgentMatch(new RegExp('MicroMessenger\\/' + version, 'i'));
+	};
+	
+	utils.isQQBrowser = function(version) {
+		version = version || '';
+		return _userAgentMatch(new RegExp('QQBrowser\\/' + version, 'i'));
 	};
 	
 	function _userAgentMatch(regex) {
@@ -155,10 +248,97 @@ slicease.version = '3.0.06';
 		return (agent.match(regex) !== null);
 	};
 	
-	/** Logger */
+	utils.isHorizontal = function() {
+		if (window.orientation != undefined) {
+			return (window.orientation == 90 || window.orientation == -90);
+		} else {
+			return window.innerWidth > window.innerHeight;
+		}
+	};
+	
+	utils.getFlashVersion = function() {
+		if (utils.isAndroid()) {
+			return 0;
+		}
+		
+		var plugins = navigator.plugins, flash;
+		if (plugins) {
+			flash = plugins['Shockwave Flash'];
+			if (flash && flash.description) {
+				var version = flash.description.replace(/\D+(\d+\.?\d*).*/, '$1');
+				return parseFloat(version);
+			}
+		}
+		
+		if (typeof window.ActiveXObject !== 'undefined') {
+			try {
+				flash = new window.ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+				if (flash) {
+					var version = flash.GetVariable('$version').split(' ')[1].replace(/\s*,\s*/, '.')
+					return parseFloat(version);
+				}
+			} catch (err) {
+				return 0;
+			}
+			
+			return flash;
+		}
+		
+		return 0;
+	};
+	
+	
+	/* protocol & extension */
+	utils.getProtocol = function(url) {
+		var protocol = 'http';
+		
+		var arr = url.match(/^([a-z]+)\:\/\//i);
+		if (arr && arr.length > 1) {
+			protocol = arr[1];
+		}
+		
+		return protocol;
+	};
+	
+	utils.getOrigin = function(file) {
+		var origin = '';
+		
+		var arr = file.match(/^[a-z]+\:\/\/([a-z0-9\-.:])\//i);
+		if (arr && arr.length > 1) {
+			origin = arr[1];
+		}
+		
+		return origin;
+	};
+	
+	utils.getFileName = function(file) {
+		var name = '';
+		
+		var arr = file.match(/\/([a-z0-9\(\)\[\]\{\}\s\-_%]*(\.[a-z0-9]+)?)$/i);
+		if (arr && arr.length > 1) {
+			name = arr[1];
+		}
+		
+		return name;
+	};
+	
+	utils.getExtension = function(file) {
+		var extension = '';
+		
+		var arr = file.match(/\/?([a-z0-9\(\)\[\]\{\}\s\-_%]*(\.([a-z0-9]+))*)\??([a-z0-9\.\-_%&=]*)$/i);
+		if (arr && arr.length > 3) {
+			extension = arr[3];
+		}
+		
+		return extension;
+	};
+	
+	
+	/* Logger */
 	var console = window.console = window.console || {
 		log: function() {}
 	};
+	
 	utils.log = function() {
 		var args = Array.prototype.slice.call(arguments, 0);
 		if (utils.typeOf(console.log) === 'object') {
@@ -216,7 +396,7 @@ slicease.version = '3.0.06';
 			}
 			
 			utils.foreach(rules, function(style, value) {
-				var name = getStyleName(style);
+				var name = _getStyleName(style);
 				if (element.style[name] !== value) {
 					element.style[name] = value;
 				}
@@ -224,7 +404,7 @@ slicease.version = '3.0.06';
 		}
 	};
 	
-	function getStyleName(name) {
+	function _getStyleName(name) {
 		name = name.split('-');
 		for (var i = 1; i < name.length; i++) {
 			name[i] = name[i].charAt(0).toUpperCase() + name[i].slice(1);
@@ -237,6 +417,7 @@ slicease.version = '3.0.06';
 	slicease.events = {
 		// General Events
 		ERROR: 'error',
+		RESIZE: 'resize',
 		
 		// API Events
 		SLICEASE_READY: 'sliceaseReady',
@@ -245,16 +426,14 @@ slicease.version = '3.0.06';
 		
 		SLICEASE_STATE: 'sliceaseState',
 		
+		SLICEASE_RENDER_UPDATE_START: 'sliceaseRenderUpdateStart',
+		SLICEASE_RENDER_UPDATE_END: 'sliceaseRenderUpdateEnd',
+		
 		// View Events
 		SLICEASE_VIEW_PLAY: 'sliceaseViewPlay',
 		SLICEASE_VIEW_STOP: 'sliceaseViewStop',
 		SLICEASE_VIEW_PREV: 'sliceaseViewPrev',
 		SLICEASE_VIEW_NEXT: 'sliceaseViewNext',
-		
-		SLICEASE_RENDER_UPDATE_START: 'sliceaseRenderUpdateStart',
-		SLICEASE_RENDER_UPDATE_END: 'sliceaseRenderUpdateEnd',
-		
-		SLICEASE_RESIZE: 'sliceaseResize',
 		
 		// Loader Events
 		SLICEASE_PROGRESS: 'sliceaseProgress',
@@ -316,6 +495,10 @@ slicease.version = '3.0.06';
 			return false;
 		};
 		
+		this.hasEventListener = function(type) {
+			return _listeners.hasOwnProperty(type);
+		};
+		
 		this.addGlobalListener = function(listener, count) {
 			try {
  				if (utils.typeOf(listener) === 'string') {
@@ -355,8 +538,9 @@ slicease.version = '3.0.06';
 			}
 			utils.extend(data, {
 				id: _id,
-				version: slicease.version,
-				type: type
+				type: type,
+				target: this,
+				version: slicease.version
 			});
 			if (slicease.debug) {
 				utils.log(type, data);
@@ -539,9 +723,8 @@ slicease.version = '3.0.06';
 			return _this;
 		};
 		
-		_this.setEntity = function(entity, renderName) {
+		_this.setEntity = function(entity) {
 			_entity = entity;
-			_this.renderName = renderName;
 			
 			_this.play = _entity.play;
 			_this.stop = _entity.stop;
@@ -751,19 +934,16 @@ slicease.version = '3.0.06';
 })(slicease);
 
 (function(slicease) {
-	slicease.core.renders = {};
+	var renders = slicease.core.renders = {};
 	
-	var renders = slicease.core.renders;
+	renders.types = {
+		DEFAULT: 'def'
+	},
+	
 	renders.precisions = {
 		HIGH_P: 'highp',
 		MEDIUM_P: 'mediump',
 		LOW_P: 'lowp'
-	};
-})(slicease);
-
-(function(slicease) {
-	slicease.core.renders.modes = {
-		DEFAULT: 'def'
 	};
 })(slicease);
 
@@ -775,7 +955,7 @@ slicease.version = '3.0.06';
 		directions = animation.directions,
 		core = slicease.core,
 		renders = core.renders,
-		rendermodes = renders.modes,
+		rendertypes = renders.types,
 		css = utils.css;
 	
 	var VERTEX_SHADER_SOURCE = ''
@@ -827,10 +1007,12 @@ slicease.version = '3.0.06';
 	renders.def = function(view, config) {
 		var _this = utils.extend(this, new events.eventdispatcher('renders.def')),
 			_defaults = {},
+			_converse = false,
 			_running = false,
 			_oldIndex = -1,
 			_newIndex = -1,
 			_range,
+			_cubic,
 			_pieces,
 			_loader,
 			_timer,
@@ -859,7 +1041,7 @@ slicease.version = '3.0.06';
 			_verticesRightIndexBuffer;
 		
 		function _init() {
-			_this.name = rendermodes.DEFAULT;
+			_this.name = rendertypes.DEFAULT;
 			
 			_this.config = utils.extend({}, _defaults, config);
 			
@@ -937,10 +1119,17 @@ slicease.version = '3.0.06';
 			_range[0] = parseInt(_range[0]);
 			_range[1] = parseInt(_range[1] || _range[0]);
 			
+			_cubic = _this.config.cubic.split(',');
+			_cubic[0] = parseInt(_cubic[0]);
+			_cubic[1] = parseInt(_cubic[1] || _cubic[0]);
+			_cubic[2] = parseInt(_cubic[2] || _cubic[1] || _cubic[0]);
+			
 			_textures = new Array(_this.config.sources.length);
 			
 			_initShaders();
 			_initBuffers();
+			
+			_this.dispatchEvent(events.SLICEASE_READY, { id: _this.config.id });
 		};
 		
 		function _initShaders() {
@@ -999,17 +1188,18 @@ slicease.version = '3.0.06';
 			_verticesRightIndexBuffer = _webgl.createBuffer();
 		}
 		
-		_this.play = function(index) {
+		_this.play = function(index, converse) {
 			if (_running) {
 				utils.log('Render busy!');
-				return;
+				return false;
 			}
 			
 			if (index < 0 || index >= _this.config.sources.length) {
 				utils.log('Index out of bounds!');
-				return;
+				return false;
 			}
 			
+			_converse = converse;
 			_running = true;
 			_oldIndex = _newIndex;
 			_newIndex = index;
@@ -1030,45 +1220,49 @@ slicease.version = '3.0.06';
 			var next = _webgl['TEXTURE' + _newIndex];
 			if (_oldIndex < 0 || _textures[_newIndex] == undefined) {
 				_loader.load(_this.config.sources[_newIndex]);
-				return;
+				return true;
 			}
 			
 			_startTimer();
+			
+			return true;
 		};
 		
 		function _drawCube(index, total) {
-			var wth = 5 / total;
+			var x = _cubic[0] / total;
+			var y = _cubic[1] / 2;
+			var z = _cubic[2] / 2;
 			var vertices = [
 				// Front face
-				-wth,  2.0,  2.0,
-				-wth, -2.0,  2.0,
-				 wth, -2.0,  2.0,
-				 wth,  2.0,  2.0,
+				-x,  y,  z,
+				-x, -y,  z,
+				 x, -y,  z,
+				 x,  y,  z,
 				// Back face
-				-wth, -2.0, -2.0,
-				-wth,  2.0, -2.0,
-				 wth,  2.0, -2.0,
-				 wth, -2.0, -2.0,
+				-x, -y, -z,
+				-x,  y, -z,
+				 x,  y, -z,
+				 x, -y, -z,
 				// Top face
-				-wth,  2.0, -2.0,
-				-wth,  2.0,  2.0,
-				 wth,  2.0,  2.0,
-				 wth,  2.0, -2.0,
+				-x,  y, -z,
+				-x,  y,  z,
+				 x,  y,  z,
+				 x,  y, -z,
 				// Bottom face
-				-wth, -2.0,  2.0,
-				-wth, -2.0, -2.0,
-				 wth, -2.0, -2.0,
-				 wth, -2.0,  2.0,
+				-x, -y,  z,
+				-x, -y, -z,
+				 x, -y, -z,
+				 x, -y,  z,
 				// Left face
-				-wth,  2.0, -2.0,
-				-wth, -2.0, -2.0,
-				-wth, -2.0,  2.0,
-				-wth,  2.0,  2.0,
+				-x,  y, -z,
+				-x, -y, -z,
+				-x, -y,  z,
+				-x,  y,  z,
 				// Right face
-				 wth,  2.0,  2.0,
-				 wth, -2.0,  2.0,
-				 wth, -2.0, -2.0,
-				 wth,  2.0, -2.0
+				 x,  y,  z,
+				 x, -y,  z,
+				 x, -y, -z,
+				 x,  y, -z
 			];
 			_webgl.bindBuffer(_webgl.ARRAY_BUFFER, _verticesBuffer);
 			_webgl.bufferData(_webgl.ARRAY_BUFFER, new Float32Array(vertices), _webgl.STATIC_DRAW);
@@ -1183,7 +1377,7 @@ slicease.version = '3.0.06';
 			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesRightIndexBuffer);
 			_webgl.bufferData(_webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertexIndices.slice(30, 36)), _webgl.STATIC_DRAW);
 			
-			_setMatrixUniforms(index, total, wth);
+			_setMatrixUniforms(index, total, x);
 			
 			var curr;
 			if (_oldIndex >= 0) {
@@ -1193,14 +1387,12 @@ slicease.version = '3.0.06';
 				_webgl.activeTexture(curr);
 				_webgl.bindTexture(_webgl.TEXTURE_2D, _textures[_oldIndex]);
 				_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, "uSampler"), _oldIndex);
-				_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesFrontIndexBuffer);
-				_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			} else {
 				_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, 'uUseTextures'), false);
-				
-				_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesFrontIndexBuffer);
-				_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			}
+			
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesFrontIndexBuffer);
+			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			
 			_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, 'uUseTextures'), true);
 			
@@ -1208,14 +1400,14 @@ slicease.version = '3.0.06';
 			_webgl.activeTexture(next);
 			_webgl.bindTexture(_webgl.TEXTURE_2D, _textures[_newIndex]);
 			_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, "uSampler"), _newIndex);
-			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesTopIndexBuffer);
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _converse ? _verticesBottomIndexBuffer : _verticesTopIndexBuffer);
 			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			
 			_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, 'uUseTextures'), false);
 			
 			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesBackIndexBuffer);
 			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
-			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesBottomIndexBuffer);
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _converse ? _verticesTopIndexBuffer : _verticesBottomIndexBuffer);
 			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesLeftIndexBuffer);
 			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
@@ -1232,13 +1424,18 @@ slicease.version = '3.0.06';
 			var x = (1 - total + index * 2) * width;
 			var z = ratioZ * -10;
 			var r = ratioR * Math.PI / 2;
+			
 			if (_oldIndex < 0) {
 				z = -10 + ratioZ * 10;
 				r = Math.PI / 4 * (1 + ratioR);
 			}
 			
+			if (_converse) {
+				r *= -1;
+			}
+			
 			var modelViewMatrix = mat4.create();
-			mat4.lookAt(modelViewMatrix, [0, 0, 12], [0, 0, 0], [0, 1, 0]);
+			mat4.lookAt(modelViewMatrix, [0, 0, _this.config.distance], [0, 0, 0], [0, 1, 0]);
 			mat4.translate(modelViewMatrix, modelViewMatrix, [x, 0.0, z]);
 			mat4.rotateX(modelViewMatrix, modelViewMatrix, r);
 			var uModelViewMatrix = _webgl.getUniformLocation(_shaderProgram, "uModelViewMatrix");
@@ -1290,7 +1487,7 @@ slicease.version = '3.0.06';
 		}
 		
 		function _startTimer() {
-			_this.dispatchEvent(events.SLICEASE_RENDER_UPDATE_START);
+			_this.dispatchEvent(events.SLICEASE_RENDER_UPDATE_START, { index: _newIndex });
 			
 			if (!_timer) {
 				_timer = new utils.timer(15);
@@ -1321,8 +1518,9 @@ slicease.version = '3.0.06';
 		}
 		
 		_this.stop = function() {
-			if (_loader) 
+			if (_loader) {
 				_loader.stop();
+			}
 		};
 		
 		_this.element = function() {
@@ -1343,11 +1541,9 @@ slicease.version = '3.0.06';
 })(slicease);
 
 (function(slicease) {
-	slicease.core.skins = {};
-})(slicease);
-
-(function(slicease) {
-	slicease.core.skins.modes = {
+	var skins = slicease.core.skins = {};
+	
+	skins.types = {
 		DEFAULT: 'def'
 	};
 })(slicease);
@@ -1355,16 +1551,31 @@ slicease.version = '3.0.06';
 (function(slicease) {
 	var utils = slicease.utils,
 		events = slicease.events,
+		core = slicease.core,
+		states = core.states,
 		skins = slicease.core.skins,
-		skinmodes = skins.modes,
+		skintypes = skins.types,
 		css = utils.css,
 		
 		WRAP_CLASS = 'sli-wrapper',
 		SKIN_CLASS = 'sli-skin',
 		RENDER_CLASS = 'sli-render',
-		POSTER_CLASS = 'sli-poster',
 		CONTROLS_CLASS = 'sli-controls',
 		CONTEXTMENU_CLASS = 'sli-contextmenu',
+		
+		DISPLAY_CLASS = 'sli-display',
+		DISPLAY_ICON_CLASS = 'sli-display-icon',
+		DISPLAY_LABEL_CLASS = 'sli-display-label',
+		
+		PAGES_CLASS = 'sli-pages',
+		CONTROL_CLASS = 'sli-control',
+		SELECTED_CLASS = 'selected',
+		PREV_CLASS = 'prev',
+		NEXT_CLASS = 'next',
+		
+		FEATURED_CLASS = 'pe-featured',
+		
+		BUTTON_CLASS = 'sli-button',
 		
 		// For all api instances
 		CSS_SMOOTH_EASE = 'opacity .25s ease',
@@ -1373,9 +1584,17 @@ slicease.version = '3.0.06';
 		CSS_RELATIVE = 'relative',
 		CSS_NORMAL = 'normal',
 		CSS_IMPORTANT = ' !important',
+		CSS_VISIBLE = 'visible',
 		CSS_HIDDEN = 'hidden',
 		CSS_NONE = 'none',
-		CSS_BLOCK = 'block';
+		CSS_BOLD = 'bold',
+		CSS_CENTER = 'center',
+		CSS_BLOCK = 'block',
+		CSS_INLINE_BLOCK = 'inline-block',
+		CSS_DEFAULT = 'default',
+		CSS_POINTER = 'pointer',
+		CSS_NO_REPEAT = 'no-repeat',
+		CSS_NOWRAP = 'nowrap';
 	
 	skins.def = function(config) {
 		var _this = utils.extend(this, new events.eventdispatcher('skins.def')),
@@ -1383,32 +1602,462 @@ slicease.version = '3.0.06';
 			_height = config.height;
 		
 		function _init() {
-			_this.name = skinmodes.DEFAULT;
+			_this.name = skintypes.DEFAULT;
 			
 			SKIN_CLASS += '-' + _this.name;
 			
 			css('.' + WRAP_CLASS, {
-				width: _width + 'px',
-				height: _height + 'px'
+				width: CSS_100PCT,
+				height: CSS_100PCT,
+				position: CSS_RELATIVE,
+				'box-shadow': '0 1px 1px rgba(0, 0, 0, 0.05)'
 			});
 			css('.' + WRAP_CLASS + ' *', {
 				margin: '0',
 				padding: '0',
-				'font-family': '微软雅黑,arial,sans-serif',
-				'font-size': '14px',
+				'font-family': 'Microsoft YaHei,arial,sans-serif',
+				'font-size': '12px',
 				'font-weight': CSS_NORMAL,
 				'box-sizing': 'content-box'
+			});
+			
+			css('.' + SKIN_CLASS + ' .' + BUTTON_CLASS, {
+				'text-align': CSS_CENTER,
+				'background-repeat': CSS_NO_REPEAT,
+				'background-position': CSS_CENTER,
+				cursor: CSS_POINTER,
+				display: CSS_BLOCK
 			});
 			
 			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS, {
 				width: CSS_100PCT,
 				height: CSS_100PCT,
+				'font-size': '0',
+				'line-height': '0',
 				position: CSS_RELATIVE
 			});
+			
+			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS, {
+				width: CSS_100PCT,
+				height: CSS_100PCT,
+				'text-align': CSS_CENTER,
+				top: '0px',
+				position: CSS_ABSOLUTE,
+				overflow: CSS_HIDDEN,
+				display: CSS_NONE,
+				'z-index': '1'
+			});
+			css('.' + SKIN_CLASS + '.' + states.IDLE + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS
+				+ ', .' + SKIN_CLASS + '.' + states.PLAYING + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS
+				+ ', .' + SKIN_CLASS + '.' + states.STOPPED + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS
+				+ ', .' + SKIN_CLASS + '.' + states.ERROR + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS, {
+				display: CSS_BLOCK
+			});
+			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS + ' .' + DISPLAY_ICON_CLASS, {
+				margin: '0 auto',
+				width: '48px',
+				height: '48px',
+				top: (_height - 40 - 48) / 2 + 'px',
+				left: (_width - 48) / 2 + 'px',
+				position: CSS_ABSOLUTE,
+				'background-repeat': CSS_NO_REPEAT,
+				'background-position': CSS_CENTER,
+				display: CSS_INLINE_BLOCK
+			});
+			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS + ' .' + DISPLAY_LABEL_CLASS, {
+				'margin-top': (_height - 40 - 32) / 2 + 'px',
+				'font-size': '14px',
+				'line-height': '32px',
+				color: '#CCCCCC',
+				'text-align': CSS_CENTER,
+				display: CSS_NONE
+			});
+			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS + ' .' + DISPLAY_LABEL_CLASS + ' a', {
+				'font-size': '14px',
+				'font-weight': CSS_BOLD,
+				color: '#FFFFFF'
+			});
+			css('.' + SKIN_CLASS + '.' + states.ERROR + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS + ' .' + DISPLAY_ICON_CLASS, {
+				'background-image': 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAnUExURUxpcebm5ubm5ufn5+fn5+bm5ubm5ujo6Obm5ubm5uXl5e/v7+bm5v4Cjk0AAAAMdFJOUwDAmSBi7IA9ULDQEGJkMtUAAAFESURBVDjLdVShUgMxEE17Nz0YEHQGDBOBoQgi7gMQeBAIBOIEg8FUVKEQGFwFKAQ1DLYCwQ8EOKCd91FN0lznst2NuMu9d3m72eyLUq1xpISxdyoQ+ksi8M6gd88VUD9QuDhEGFSs0Esc8zLBs4nD3gZO6zhd8AjMznzwyxTPnbaX0PUoJQxskNavKd4DDsJkl6Q0xs9ykmaksgp8jToQSjTGjlS6ksULSamLb57YxhNP3AvJqiE+eGIyFw56agWCy7b34onfdeK8FoghBCkDIbi2zYNmOuM3uBXiMiXJ8ccXcRMXfNlPQtcwB2UQGm9KjzaD5Zuhg3++fUz8kzZcjrokLRpLG5V8wrGpm69raoMgrFshu9E4HjetBSurKfXpzHjV3pI3bX9w03cvm2x3o0LjZ3IFFCZeAKP1K2PfWf129bkALBuQv4Z6ZbEAAAAASUVORK5CYII=)'
+			});
+			css('.' + SKIN_CLASS + '.' + states.ERROR + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS + ' .' + DISPLAY_ICON_CLASS + ':hover', {
+				'background-image': 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAnUExURUxpcQCf6ACf6QCf7wCf6gCg6QCg6QCf6wCf6QCg6QCf6QCf7wCg6Ta1FVAAAAAMdFJOUwDAmSBi7IA9ULDQEGJkMtUAAAFESURBVDjLdVShUgMxEE17Nz0YEHQGDBOBoQgi7gMQeBAIBOIEg8FUVKEQGFwFKAQ1DLYCwQ8EOKCd91FN0lznst2NuMu9d3m72eyLUq1xpISxdyoQ+ksi8M6gd88VUD9QuDhEGFSs0Esc8zLBs4nD3gZO6zhd8AjMznzwyxTPnbaX0PUoJQxskNavKd4DDsJkl6Q0xs9ykmaksgp8jToQSjTGjlS6ksULSamLb57YxhNP3AvJqiE+eGIyFw56agWCy7b34onfdeK8FoghBCkDIbi2zYNmOuM3uBXiMiXJ8ccXcRMXfNlPQtcwB2UQGm9KjzaD5Zuhg3++fUz8kzZcjrokLRpLG5V8wrGpm69raoMgrFshu9E4HjetBSurKfXpzHjV3pI3bX9w03cvm2x3o0LjZ3IFFCZeAKP1K2PfWf129bkALBuQv4Z6ZbEAAAAASUVORK5CYII=)'
+			});
+			
 			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS + ' canvas', {
-				'background-color': '#585862'
+				'background-color': 'transparent'
+			});
+			
+			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS, {
+				'z-index': '4'
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + PAGES_CLASS, {
+				bottom: '10px',
+				'line-height': '10px',
+				position: CSS_ABSOLUTE,
+				display: CSS_BLOCK
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + PAGES_CLASS + ' .' + BUTTON_CLASS, {
+				'margin-right': '8px',
+				width: '25px',
+				height: '11px',
+				display: CSS_INLINE_BLOCK
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + PAGES_CLASS + ' .' + BUTTON_CLASS + ':last-child', {
+				'margin-right': '0'
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + PAGES_CLASS + ' .' + BUTTON_CLASS + ' a', {
+				margin: '3px 0',
+				width: CSS_100PCT,
+				height: '5px',
+				opacity: '.3',
+				background: '#000000',
+				display: CSS_INLINE_BLOCK
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + PAGES_CLASS + ' .' + BUTTON_CLASS + '.' + SELECTED_CLASS + ' a', {
+				opacity: '.6',
+				background: '#FFFFFF'
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + CONTROL_CLASS, {
+				'margin-top': '-20px',
+				width: '24px',
+				height: '40px',
+				top: '50%',
+				opacity: '.3',
+				background: '#000000',
+				position: CSS_ABSOLUTE,
+				display: CSS_NONE
+			});
+			css('.' + WRAP_CLASS + ':hover .' + CONTROLS_CLASS + ' .' + CONTROL_CLASS, {
+				display: CSS_BLOCK
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + CONTROL_CLASS + ':hover', {
+				opacity: '.4'
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + CONTROL_CLASS + ' span', {
+				width: CSS_100PCT,
+				height: CSS_100PCT,
+				'background-repeat': CSS_NO_REPEAT,
+				'background-position': CSS_CENTER,
+				display: CSS_BLOCK
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + CONTROL_CLASS + '.' + PREV_CLASS, {
+				left: '0'
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + CONTROL_CLASS + '.' + PREV_CLASS + ' span', {
+				'background-image': 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAlklEQVRIS7XVwQ2AIBBE0ZnO7ETpDDuxszUcTIwxsDsLnDz9J8QVYvHi4j5SgJltJK/eS8qAmVUAO4BCsj3/Lgl4xVv0JHlMAyLxhoZ2EI2HACXuBtS4C8jEh0A23gVmxCNAJVmU30r3M/3sQkKGc5BFhkA7lgziAjKIG1CREKAgYSCKSMAHmX/hPAO39Mr0TrV8RF7gBqveYhnAXdKeAAAAAElFTkSuQmCC)'
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + CONTROL_CLASS + '.' + NEXT_CLASS, {
+				right: '0'
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + CONTROL_CLASS + '.' + NEXT_CLASS + ' span', {
+				'background-image': 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAApElEQVRIS7XV0Q2DMAwE0LvNugllhG7CBqWbsJmrSPBDIbbPTf5zz4lsmRh8ODgfLmBmD5KbWkgXMLMngDeAleSsIB6wApj2YAmJfFEJcYFWvZnJSAioIGFARVKAgqSBLCIBF8iL5HI1J/8CPiTbUP4cCTi17W1409JAJjwNZMNTgBIeBtTwEFAJd4FqeAQ4Fk63FXuLyG3ToStTWZHnO+4LqsgXYy1iGYSzNHkAAAAASUVORK5CYII=)'
+			});
+			
+			css('.' + SKIN_CLASS + ' .' + CONTEXTMENU_CLASS, {
+				'white-space': CSS_NOWRAP,
+				position: CSS_ABSOLUTE,
+				display: CSS_NONE,
+				'z-index': '5'
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTEXTMENU_CLASS + ' ul', {
+				'list-style': CSS_NONE
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTEXTMENU_CLASS + ' ul li', {
+				
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTEXTMENU_CLASS + ' ul li a', {
+				padding: '8px 14px',
+				color: '#E6E6E6',
+				'line-height': '20px',
+				'text-decoration': CSS_NONE,
+				background: '#252525',
+				display: CSS_BLOCK
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTEXTMENU_CLASS + ' ul li a:hover', {
+				'text-decoration': CSS_NONE,
+				background: '#303030'
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTEXTMENU_CLASS + ' ul li.' + FEATURED_CLASS + ' a', {
+				color: '#BDBDBD',
+				background: '#454545'
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTEXTMENU_CLASS + ' ul li.' + FEATURED_CLASS + ' a:hover', {
+				'text-decoration': CSS_NONE,
+				background: '#505050'
+			});
+			css('.' + SKIN_CLASS + ' .' + CONTEXTMENU_CLASS + ' ul li a span', {
+				'margin-right': '10px',
+				'padding-right': '10px',
+				width: '20px',
+				height: '20px',
+				'border-right': '1px solid #BDBDBD',
+				'vertical-align': 'middle',
+				display: CSS_INLINE_BLOCK
 			});
 		}
+		
+		_this.resize = function(width, height) {
+			
+		};
+		
+		_init();
+	};
+})(slicease);
+
+(function(slicease) {
+	slicease.core.components = {};
+})(slicease);
+
+(function(slicease) {
+	var utils = slicease.utils,
+		css = utils.css,
+		events = slicease.events,
+		core = slicease.core,
+		components = core.components,
+		
+		PAGES_CLASS = 'sli-pages',
+		CONTROL_CLASS = 'sli-control',
+		SELECTED_CLASS = 'selected',
+		PREV_CLASS = 'prev',
+		NEXT_CLASS = 'next',
+		
+		BUTTON_CLASS = 'sli-button',
+		
+		// For all api instances
+		CSS_BLOCK = 'block';
+	
+	components.controlbar = function(layer, config) {
+		var _this = utils.extend(this, new events.eventdispatcher('components.controlbar')),
+			_defaults = {},
+			_pages,
+			_prev,
+			_next;
+		
+		function _init() {
+			_this.config = utils.extend({}, _defaults, config);
+			
+			_buildLayout();
+		}
+		
+		function _buildLayout() {
+			_pages = utils.createElement('div', PAGES_CLASS);
+			
+			for (var i = 0; i < config.pages; i++) {
+				var element = utils.createElement('span', BUTTON_CLASS);
+				element.setAttribute('index', i);
+				element.innerHTML = '<a></a>';
+				element.addEventListener('click', _onPageClick);
+				
+				_pages.appendChild(element);
+			}
+			
+			_prev = utils.createElement('div', CONTROL_CLASS + ' ' + BUTTON_CLASS + ' ' + PREV_CLASS);
+			_prev.innerHTML = '<span></span>';
+			_prev.addEventListener('click', function(e) {
+				_this.dispatchEvent(events.SLICEASE_VIEW_PREV);
+			});
+			
+			_next = utils.createElement('div', CONTROL_CLASS + ' ' + BUTTON_CLASS + ' ' + NEXT_CLASS);
+			_next.innerHTML = '<span></span>';
+			_next.addEventListener('click', function(e) {
+				_this.dispatchEvent(events.SLICEASE_VIEW_NEXT);
+			});
+			
+			layer.appendChild(_pages);
+			layer.appendChild(_prev);
+			layer.appendChild(_next);
+		}
+		
+		function _onPageClick(e) {
+			var index = e.currentTarget.getAttribute('index');
+			_this.dispatchEvent(events.SLICEASE_VIEW_PLAY, { index: index });
+		}
+		
+		_this.setActive = function(index) {
+			for (var i = 0; i < _pages.childNodes.length; i++) {
+				var element = _pages.childNodes[i];
+				if (i == index) {
+					utils.addClass(element, SELECTED_CLASS);
+				} else {
+					utils.removeClass(element, SELECTED_CLASS);
+				}
+			}
+		};
+		
+		_this.resize = function(width, height) {
+			css.style(_pages, {
+				left: ((width - (_pages.childNodes.length * 33 - 8)) / 2) + 'px'
+			});
+		};
+		
+		_this.destroy = function() {
+			
+		};
+		
+		function _forward(e) {
+			_this.dispatchEvent(e.type, e);
+		}
+		
+		_init();
+	};
+})(slicease);
+
+(function(slicease) {
+	var utils = slicease.utils,
+		css = utils.css,
+		events = slicease.events,
+		core = slicease.core,
+		states = core.states,
+		components = core.components,
+		
+		BUTTON_CLASS = 'sli-button',
+		
+		DISPLAY_CLASS = 'sli-display',
+		DISPLAY_ICON_CLASS = 'sli-display-icon',
+		DISPLAY_LABEL_CLASS = 'sli-display-label',
+		
+		CSS_NONE = 'none',
+		CSS_BLOCK = 'block',
+		CSS_INLINE_BLOCK = 'inline-block';
+	
+	components.display = function(config) {
+		var _this = utils.extend(this, new events.eventdispatcher('components.display')),
+			_defaults = {
+				id: 'sli-display'
+			},
+			_container,
+			_icon,
+			_label,
+			_timer;
+		
+		function _init() {
+			_this.config = utils.extend({}, _defaults, config);
+			
+			_container = utils.createElement('div', DISPLAY_CLASS);
+			
+			_icon = utils.createElement('span', BUTTON_CLASS + ' ' + DISPLAY_ICON_CLASS);
+			_container.appendChild(_icon);
+			
+			_label = utils.createElement('span', DISPLAY_LABEL_CLASS);
+			_label.id = _this.config.id;
+			_container.appendChild(_label);
+		}
+		
+		_this.show = function(state, message) {
+			switch (state) {
+				case states.ERROR:
+					break;
+					
+				default:
+					break;
+			}
+			
+			css.style(_label, {
+				display: message ? CSS_INLINE_BLOCK : CSS_NONE
+			});
+			
+			_label.innerHTML = message;
+		};
+		
+		_this.element = function() {
+			return _container;
+		};
+		
+		_this.resize = function(width, height) {
+			css.style(_icon, {
+				top: (height - 48) / 2 + 'px',
+				left: (width - 48) / 2 + 'px'
+			});
+			css.style(_label, {
+				'margin-top': (height - 32) / 2 + 'px'
+			});
+		};
+		
+		_init();
+	};
+})(slicease);
+
+(function(slicease) {
+	var utils = slicease.utils,
+		css = utils.css,
+		events = slicease.events,
+		core = slicease.core,
+		components = core.components,
+		
+		FEATURED_CLASS = 'sli-featured';
+	
+	components.contextmenu = function(layer, config) {
+		var _this = utils.extend(this, new events.eventdispatcher('components.contextmenu')),
+			_defaults = {
+				items: []
+			},
+			_info = {
+				text: 'SLICEASE ' + slicease.version,
+				link: 'http://studease.cn/slicease',
+				target: '_blank'
+			},
+			_container,
+			_logo,
+			_img,
+			_loaded = false;
+		
+		function _init() {
+			_this.config = utils.extend({}, _defaults, config);
+			
+			_this.config.items = [_info].concat(_this.config.items);
+			
+			_container = utils.createElement('ul');
+			
+			for (var i = 0; i < _this.config.items.length; i++) {
+				var item = _this.config.items[i];
+				
+				var a = utils.createElement('a');
+				if (item.link) {
+					a.href = item.link;
+				}
+				if (item.target) {
+					a.target = item.target;
+				}
+				if (item.text) {
+					a.innerText = item.text;
+				}
+				if (item.icon) {
+					var span = utils.createElement('span');
+					a.insertAdjacentElement('afterbegin', span);
+					
+					css.style(span, {
+						background: 'url(' + item.icon + ') no-repeat center left'
+					});
+				}
+				
+				var li = utils.createElement('li', item.icon ? FEATURED_CLASS : '');
+				li.appendChild(a);
+				
+				_container.appendChild(li);
+			}
+			
+			layer.appendChild(_container);
+		}
+		
+		_this.show = function(offsetX, offsetY) {
+			css.style(layer, {
+				left: offsetX + 'px',
+				top: offsetY + 'px',
+				display: 'block'
+			});
+		};
+		
+		_this.hide = function() {
+			css.style(layer, {
+				display: 'none'
+			});
+		};
+		
+		
+		_this.element = function() {
+			return _container;
+		};
 		
 		_this.resize = function(width, height) {
 			
@@ -1433,7 +2082,7 @@ slicease.version = '3.0.06';
 			_this.id = config.id;
 			
 			_this.model = _model = new core.model(config);
-			_this.view = _view = new core.view(_this, _model);
+			_this.view = _view = new core.view(_model);
 			_this.controller = _controller = new core.controller(_model, _view);
 			
 			_controller.addGlobalListener(_forward);
@@ -1454,8 +2103,8 @@ slicease.version = '3.0.06';
 		
 		_this.setup = function() {
 			setTimeout(function() {
-				_view.setup();
-			}, 0);
+				_controller.setup();
+			});
 		};
 		
 		function _forward(e) {
@@ -1487,14 +2136,19 @@ slicease.version = '3.0.06';
 	core.model = function(config) {
 		 var _this = utils.extend(this, new events.eventdispatcher('core.model')),
 		 	_defaults = {},
-		 	_state = states.STOPPED;
+		 	_state = states.STOPPED,
+		 	_properties;
 		
 		function _init() {
 			_this.config = utils.extend({}, _defaults, config);
+			
+			_properties = {
+				
+			};
 		}
 		
 		_this.setState = function(state) {
-			if (state === _state) {
+			if (state == _state) {
 				return;
 			}
 			_state = state;
@@ -1505,8 +2159,12 @@ slicease.version = '3.0.06';
 			return _state;
 		};
 		
+		_this.getProperty = function(key) {
+			return _properties[key];
+		};
+		
 		_this.getConfig = function(name) {
-			return _this.config[name] || {};
+			return _this.config[name];
 		};
 		
 		_this.destroy = function() {
@@ -1522,10 +2180,9 @@ slicease.version = '3.0.06';
 		events = slicease.events,
 		core = slicease.core,
 		states = core.states,
+		components = core.components,
 		renders = core.renders,
-		rendermodes = renders.modes,
 		skins = core.skins,
-		skinmodes = skins.modes,
 		css = utils.css,
 		
 		WRAP_CLASS = 'sli-wrapper',
@@ -1546,58 +2203,107 @@ slicease.version = '3.0.06';
 		CSS_NONE = 'none',
 		CSS_BLOCK = 'block';
 	
-	core.view = function(entity, model) {
+	core.view = function(model) {
 		var _this = utils.extend(this, new events.eventdispatcher('core.view')),
 			_wrapper,
 			_renderLayer,
-			_posterLayer,
 			_controlsLayer,
 			_contextmenuLayer,
+			_controlbar,
+			_display,
+			_contextmenu,
 			_render,
 			_skin,
+			_autohidetimer,
 			_errorOccurred = false;
 		
 		function _init() {
-			_wrapper = utils.createElement('div', WRAP_CLASS + ' ' + SKIN_CLASS + '-' + model.config.skin.name);
-			_wrapper.id = entity.id;
+			_wrapper = utils.createElement('div', WRAP_CLASS + ' ' + SKIN_CLASS + '-' + model.getConfig('skin').name);
+			_wrapper.id = model.getConfig('id');
 			//_wrapper.tabIndex = 0;
 			
 			_renderLayer = utils.createElement('div', RENDER_CLASS);
-			_posterLayer = utils.createElement('div', POSTER_CLASS);
 			_controlsLayer = utils.createElement('div', CONTROLS_CLASS);
 			_contextmenuLayer = utils.createElement('div', CONTEXTMENU_CLASS);
 			
 			_wrapper.appendChild(_renderLayer);
-			_wrapper.appendChild(_posterLayer);
 			_wrapper.appendChild(_controlsLayer);
 			_wrapper.appendChild(_contextmenuLayer);
 			
+			_initComponents();
 			_initRender();
 			_initSkin();
 			
-			var replace = document.getElementById(entity.id);
-			replace.parentNode.replaceChild(_wrapper, replace);
-			
-			window.onresize = function() {
-				if (utils.typeOf(model.config.onresize) === 'function') 
-					model.config.onresize.call(null);
+			_wrapper.oncontextmenu = function(e) {
+				e = e || window.event;
+				e.preventDefault ? e.preventDefault() : e.returnValue = false;
+				return false;
 			};
+			
+			window.addEventListener('resize', _onResize);
+			_wrapper.addEventListener('keydown', _onKeyDown);
+			_wrapper.addEventListener('mousedown', _onMouseDown);
+			document.addEventListener('mousedown', _onMouseDown);
+			
+			var replace = document.getElementById(model.getConfig('id'));
+			replace.parentNode.replaceChild(_wrapper, replace);
+		}
+		
+		function _initComponents() {
+			// controlbar
+			var cbcfg = {
+				pages: model.getConfig('sources').length
+			};
+			
+			try {
+				_controlbar = new components.controlbar(_controlsLayer, cbcfg);
+				_controlbar.addGlobalListener(_forward);
+			} catch (err) {
+				utils.log('Failed to init "controlbar" component!');
+			}
+			
+			// display
+			var dicfg = utils.extend({}, model.getConfig('display'), {
+				id: model.getConfig('id') + '-display'
+			});
+			
+			try {
+				_display = new components.display(dicfg);
+				_display.addGlobalListener(_forward);
+				
+				_renderLayer.appendChild(_display.element());
+			} catch (err) {
+				utils.log('Failed to init "display" component!');
+			}
+			
+			// contextmenu
+			var ctxcfg = utils.extend({}, model.getConfig('contextmenu'));
+			
+			try {
+				_contextmenu = new components.contextmenu(_contextmenuLayer, ctxcfg);
+				_contextmenu.addGlobalListener(_forward);
+			} catch (err) {
+				utils.log('Failed to init "contextmenu" component!');
+			}
 		}
 		
 		function _initRender() {
 			var cfg = utils.extend({}, model.getConfig('render'), {
-				id: entity.id,
-				width: model.config.width,
-				height: model.config.height,
-				sources: model.config.sources,
-				range: model.config.range
+				id: model.getConfig('id'),
+				width: model.getConfig('width'),
+				height: model.getConfig('height'),
+				sources: model.getConfig('sources'),
+				range: model.getConfig('range'),
+				cubic: model.getConfig('cubic'),
+				distance: model.getConfig('distance')
 			});
 			
 			try {
 				_render = _this.render = new renders[cfg.name](_this, cfg);
-				_render.addEventListener(events.SLICEASE_RENDER_UPDATE_START, _onRenderUpdateStart);
-				_render.addEventListener(events.SLICEASE_RENDER_UPDATE_END, _onRenderUpdateEnd);
-				_render.addEventListener(events.SLICEASE_RENDER_ERROR, _onRenderError);
+				_render.addEventListener(events.SLICEASE_READY, _forward);
+				_render.addEventListener(events.SLICEASE_RENDER_UPDATE_START, _onUpdateStart);
+				_render.addEventListener(events.SLICEASE_RENDER_UPDATE_END, _forward);
+				_render.addEventListener(events.SLICEASE_RENDER_ERROR, _forward);
 			} catch (e) {
 				utils.log('Failed to init render ' + cfg.name + '!');
 			}
@@ -1609,9 +2315,9 @@ slicease.version = '3.0.06';
 		
 		function _initSkin() {
 			var cfg = utils.extend({}, model.getConfig('skin'), {
-				id: entity.id,
-				width: model.config.width,
-				height: model.config.height
+				id: model.getConfig('id'),
+				width: model.getConfig('width'),
+				height: model.getConfig('height')
 			});
 			
 			try {
@@ -1622,21 +2328,22 @@ slicease.version = '3.0.06';
 		}
 		
 		_this.setup = function() {
+			// Ignore components & skin failure.
 			if (!_render) {
-				_this.dispatchEvent(events.SLICEASE_SETUP_ERROR, { message: 'Render not available!', name: model.config.render.name });
+				_this.dispatchEvent(events.SLICEASE_SETUP_ERROR, { message: 'Render not available!', name: model.getConfig('render').name });
 				return;
 			}
+			
 			_render.setup();
-			
-			// Ignore skin failure.
-			
-			try {
-				_wrapper.addEventListener('keydown', _onKeyDown);
-			} catch (e) {
-				_wrapper.attachEvent('onkeydown', _onKeyDown);
-			}
-			
-			_this.dispatchEvent(events.SLICEASE_READY);
+			_this.resize();
+		};
+		
+		_this.play = function(index, converse) {
+			return _render.play(index, converse);
+		};
+		
+		_this.stop = function() {
+			_render.stop();
 		};
 		
 		function _onKeyDown(e) {
@@ -1660,37 +2367,95 @@ slicease.version = '3.0.06';
 			}
 		}
 		
+		function _onMouseDown(e) {
+			if (!_contextmenu) {
+				return;
+			}
+			
+			if (e.currentTarget == undefined) {
+				for (var node = e.srcElement; node; node = node.offsetParent) {
+					if (node == _wrapper) {
+						e.currentTarget = _wrapper;
+						break;
+					}
+				}
+			}
+			
+			if (e.button == (utils.isMSIE(8) ? 1 : 0) || e.currentTarget != _wrapper) {
+				setTimeout(function() {
+					_contextmenu.hide();
+				}, 200);
+			} else if (e.button == 2) {
+				var offsetX = 0;
+				var offsetY = 0;
+				
+				for (var node = e.srcElement || e.target; node && node != _wrapper; node = node.offsetParent) {
+					offsetX += node.offsetLeft;
+					offsetY += node.offsetTop;
+				}
+				
+				_contextmenu.show(e.offsetX + offsetX, e.offsetY + offsetY);
+				
+				e.preventDefault ? e.preventDefault() : e.returnValue = false;
+				e.stopPropagation ? e.stopPropagation() : e.cancelBubble = true;
+				
+				return false;
+			}
+		}
+		
+		function _onUpdateStart(e) {
+			_controlbar.setActive(e.index);
+			_forward(e);
+		}
+		
+		_this.display = function(state, message) {
+			if (_display) {
+				_display.show(state, message);
+			}
+		};
+		
+		function _onResize(e) {
+			_this.resize();
+		}
+		
 		_this.resize = function(width, height) {
-			if (_render) 
-				_render.resize(width, height);
-			if (_skin) 
-				_skin.resize(width, height);
+			setTimeout(function() {
+				if (width === undefined || height === undefined) {
+					width = _renderLayer.clientWidth;
+					height = _renderLayer.clientHeight;
+				}
+				
+				var ratio = model.getConfig('aspectratio');
+				if (ratio) {
+					var arr = ratio.match(/(\d+)\:(\d+)/);
+					if (arr && arr.length > 2) {
+						var w = parseInt(arr[1]);
+						var h = parseInt(arr[2]);
+						height = width * h / w;
+					}
+				}
+				
+				if (_render) {
+					_render.resize(width, height);
+				}
+				
+				_this.dispatchEvent(events.RESIZE, { width: width, height: height });
+				
+				_controlbar.resize(width, height);
+				_display.resize(width, height);
+				_contextmenu.resize(width, height);
+			});
 		};
 		
 		_this.destroy = function() {
 			if (_wrapper) {
-				try {
-					_wrapper.removeEventListener('keydown', _onKeyDown);
-				} catch (e) {
-					_wrapper.detachEvent('onkeydown', _onKeyDown);
-				}
+				window.removeEventListener('resize', _onResize);
+				_wrapper.removeEventListener('keydown', _onKeyDown);
 			}
 			if (_render) {
 				_render.destroy();
 			}
 		};
-		
-		function _onRenderUpdateStart(e) {
-			_forward(e);
-		}
-		
-		function _onRenderUpdateEnd(e) {
-			_forward(e);
-		}
-		
-		function _onRenderError(e) {
-			_forward(e);
-		}
 		
 		function _forward(e) {
 			_this.dispatchEvent(e.type, e);
@@ -1716,7 +2481,9 @@ slicease.version = '3.0.06';
 			model.addEventListener(events.SLICEASE_STATE, _modelStateHandler);
 			
 			view.addEventListener(events.SLICEASE_READY, _onReady);
+			view.addEventListener(events.SLICEASE_STATE, _renderStateHandler);
 			view.addEventListener(events.SLICEASE_SETUP_ERROR, _onSetupError);
+			view.addEventListener(events.RESIZE, _forward);
 			
 			view.addEventListener(events.SLICEASE_VIEW_PLAY, _onPlay);
 			view.addEventListener(events.SLICEASE_VIEW_STOP, _onStop);
@@ -1727,38 +2494,6 @@ slicease.version = '3.0.06';
 			view.addEventListener(events.SLICEASE_RENDER_UPDATE_END, _onUpdateEnd);
 			view.addEventListener(events.SLICEASE_RENDER_ERROR, _onRenderError);
 		}
-		
-		_this.play = function(index) {
-			if (index === undefined) {
-				_this.next();
-				return;
-			}
-			
-			_index = Math.min(Math.max(index, 0), model.config.sources.length - 1);
-			view.render.play(_index);
-		};
-		
-		_this.stop = function() {
-			_loader.stop();
-			_stopTimer();
-			
-			model.setState(states.STOPPED);
-			view.render.stop();
-		};
-		
-		_this.prev = function() {
-			if (_index-- === 0) {
-				_index = model.config.sources.length - 1;
-			}
-			view.render.play(_index);
-		};
-		
-		_this.next = function() {
-			if (_index++ === model.config.sources.length - 1) {
-				_index = 0;
-			}
-			view.render.play(_index);
-		};
 		
 		function _modelStateHandler(e) {
 			switch (e.state) {
@@ -1787,23 +2522,83 @@ slicease.version = '3.0.06';
 			}
 		}
 		
+		_this.setup = function(e) {
+			if (!_ready) {
+				view.setup();
+			}
+		};
+		
+		_this.play = function(index) {
+			if (index == undefined) {
+				_this.next();
+				return;
+			}
+			
+			index = Math.min(Math.max(index, 0), model.getConfig('sources').length - 1);
+			var converse = index < _index;
+			
+			if (view.play(index, converse)) {
+				_index = index;
+			}
+		};
+		
+		_this.stop = function() {
+			_loader.stop();
+			_stopTimer();
+			
+			model.setState(states.STOPPED);
+			view.stop();
+		};
+		
+		_this.prev = function() {
+			var index = _index - 1;
+			if (index < 0) {
+				index = model.getConfig('sources').length - 1;
+			}
+			
+			if (view.play(index, true)) {
+				_index = index;
+			}
+		};
+		
+		_this.next = function() {
+			var index = _index + 1;
+			if (index > model.getConfig('sources').length - 1) {
+				index = 0;
+			}
+			
+			if (view.play(index, false)) {
+				_index = index;
+			}
+		};
+		
+		
+		function _renderStateHandler(e) {
+			model.setState(e.state);
+			_forward(e);
+		}
+		
 		function _onPlay(e) {
 			var state = model.getState();
-			if (state !== states.PLAYING) {
+			if (state != states.PLAYING) {
 				_this.play(e.index);
+				_forward(e);
 			}
 		}
 		
 		function _onStop(e) {
 			_this.stop();
+			_forward(e);
 		}
 		
 		function _onPrev(e) {
 			_this.prev();
+			_forward(e);
 		}
 		
 		function _onNext(e) {
 			_this.next();
+			_forward(e);
 		}
 		
 		function _onUpdateStart(e) {
@@ -1819,7 +2614,7 @@ slicease.version = '3.0.06';
 		
 		function _startTimer() {
 			if (!_timer) {
-				_timer = new utils.timer(model.config.interval, 1);
+				_timer = new utils.timer(model.getConfig('interval'), 1);
 				_timer.addEventListener(events.SLICEASE_TIMER, _onTimer);
 			}
 			
@@ -1838,11 +2633,17 @@ slicease.version = '3.0.06';
 		
 		function _onSetupError(e) {
 			model.setState(states.ERROR);
+			view.display(states.ERROR, e.message);
+			
+			_this.stop();
 			_forward(e);
 		}
 		
 		function _onRenderError(e) {
 			model.setState(states.ERROR);
+			view.display(states.ERROR, e.message);
+			
+			_this.stop();
 			_forward(e);
 		}
 		
@@ -1861,8 +2662,8 @@ slicease.version = '3.0.06';
 	var embed = slicease.embed = function(api) {
 		var _this = utils.extend(this, new events.eventdispatcher('embed')),
 			_config = {},
-			_embedder = null,
-			_errorOccurred = false;
+			_errorOccurred = false,
+			_embedder = null;
 		
 		function _init() {
 			utils.foreach(api.config.events, function(e, cb) {
@@ -1895,15 +2696,22 @@ slicease.version = '3.0.06';
 			slicease.api.displayError(message, _config);
 		};
 		
+		_this.clearScreen = function() {
+			_errorOccurred = false;
+			slicease.api.displayError('', _config);
+		};
+		
 		function _onEvent(e) {
 			switch (e.type) {
 				case events.ERROR:
 				case events.SLICEASE_SETUP_ERROR:
 				case events.SLICEASE_RENDER_ERROR:
+					utils.log('[ERROR] ' + e.message);
 					_this.errorScreen(e.message);
 					_this.dispatchEvent(events.ERROR, e);
 					break;
 				default:
+					_this.clearScreen();
 					_forward(e);
 					break;
 			}
@@ -1924,25 +2732,32 @@ slicease.version = '3.0.06';
 		core = slicease.core,
 		renders = core.renders,
 		precisions = renders.precisions,
-		rendermodes = renders.modes,
+		rendertypes = renders.types,
 		skins = core.skins,
-		skinmodes = skins.modes;
+		skintypes = skins.types;
 	
 	embed.config = function(config) {
 		var _defaults = {
 			width: 640,
 			height: 360,
+			aspectratio: '',
 			sources: [],
-			range: '3-10',
-			controls: true,
+			range: '3-9',
+			cubic: '5,4',
+			distance: 12,
 			interval: 5000,
+			controls: true,
+			debug: false,
 			render: {
-				name: rendermodes.DEFAULT,
+				name: rendertypes.DEFAULT,
 				precision: precisions.HIGH_P,
 				profile: [0.6, 0.6, 0.6, 1.0]
 			},
 			skin: {
-				name: skinmodes.DEFAULT
+				name: skintypes.DEFAULT
+			},
+			events: {
+				
 			}
 		},
 		
@@ -1969,7 +2784,7 @@ slicease.version = '3.0.06';
 			var entity = new core.entity(config);
 			entity.addGlobalListener(_onEvent);
 			entity.setup();
-			api.setEntity(entity, config.render.name);
+			api.setEntity(entity);
 		};
 		
 		function _onEvent(e) {

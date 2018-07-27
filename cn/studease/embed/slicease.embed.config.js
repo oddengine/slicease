@@ -5,25 +5,32 @@
 		core = slicease.core,
 		renders = core.renders,
 		precisions = renders.precisions,
-		rendermodes = renders.modes,
+		rendertypes = renders.types,
 		skins = core.skins,
-		skinmodes = skins.modes;
+		skintypes = skins.types;
 	
 	embed.config = function(config) {
 		var _defaults = {
 			width: 640,
 			height: 360,
+			aspectratio: '',
 			sources: [],
 			range: '3-9',
-			controls: true,
+			cubic: '5,4',
+			distance: 12,
 			interval: 5000,
+			controls: true,
+			debug: false,
 			render: {
-				name: rendermodes.DEFAULT,
+				name: rendertypes.DEFAULT,
 				precision: precisions.HIGH_P,
 				profile: [0.6, 0.6, 0.6, 1.0]
 			},
 			skin: {
-				name: skinmodes.DEFAULT
+				name: skintypes.DEFAULT
+			},
+			events: {
+				
 			}
 		},
 		

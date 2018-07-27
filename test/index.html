@@ -43,11 +43,13 @@ body {
 	<script type='text/javascript' src='../cn/studease/core/slicease.core.js'></script>
 	<script type='text/javascript' src='../cn/studease/core/slicease.core.states.js'></script>
 	<script type='text/javascript' src='../cn/studease/core/renders/slicease.core.renders.js'></script>
-	<script type='text/javascript' src='../cn/studease/core/renders/slicease.core.renders.modes.js'></script>
 	<script type='text/javascript' src='../cn/studease/core/renders/slicease.core.renders.def.js'></script>
 	<script type='text/javascript' src='../cn/studease/core/skins/slicease.core.skins.js'></script>
-	<script type='text/javascript' src='../cn/studease/core/skins/slicease.core.skins.modes.js'></script>
 	<script type='text/javascript' src='../cn/studease/core/skins/slicease.core.skins.def.js'></script>
+	<script type='text/javascript' src='../cn/studease/core/components/slicease.core.components.js'></script>
+	<script type='text/javascript' src='../cn/studease/core/components/slicease.core.components.controlbar.js'></script>
+	<script type='text/javascript' src='../cn/studease/core/components/slicease.core.components.display.js'></script>
+	<script type='text/javascript' src='../cn/studease/core/components/slicease.core.components.contextmenu.js'></script>
 	<script type='text/javascript' src='../cn/studease/core/slicease.core.entity.js'></script>
 	<script type='text/javascript' src='../cn/studease/core/slicease.core.model.js'></script>
 	<script type='text/javascript' src='../cn/studease/core/slicease.core.view.js'></script>
@@ -57,16 +59,18 @@ body {
 	<script type='text/javascript' src='../cn/studease/embed/slicease.embed.embedder.js'></script>
 </head>
 <body>
-	<div style='margin: 40px auto; width: 100%; max-width: 960px;'>
+	<div style='margin: 40px auto; width: 100%; max-width: 1000px;'>
 		<div id='slicer'></div>
 	</div>
 	
 	<script type='text/javaScript'>
 		slicease('slicer').setup({
-			width: 960,
-			height: 400,
+			width: 1000,
+			height: 460,
 			sources: ['images/img1.png', 'images/img2.png', 'images/img3.png', 'images/img4.png'],
-			range: '3-9'
+			range: '3-9',
+			cubic: '5,4',
+			distance: 12
 		});
 	</script>
 </body>

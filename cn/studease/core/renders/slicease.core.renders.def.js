@@ -6,7 +6,7 @@
 		directions = animation.directions,
 		core = slicease.core,
 		renders = core.renders,
-		rendermodes = renders.modes,
+		rendertypes = renders.types,
 		css = utils.css;
 	
 	var VERTEX_SHADER_SOURCE = ''
@@ -58,10 +58,12 @@
 	renders.def = function(view, config) {
 		var _this = utils.extend(this, new events.eventdispatcher('renders.def')),
 			_defaults = {},
+			_converse = false,
 			_running = false,
 			_oldIndex = -1,
 			_newIndex = -1,
 			_range,
+			_cubic,
 			_pieces,
 			_loader,
 			_timer,
@@ -90,7 +92,7 @@
 			_verticesRightIndexBuffer;
 		
 		function _init() {
-			_this.name = rendermodes.DEFAULT;
+			_this.name = rendertypes.DEFAULT;
 			
 			_this.config = utils.extend({}, _defaults, config);
 			
@@ -168,10 +170,17 @@
 			_range[0] = parseInt(_range[0]);
 			_range[1] = parseInt(_range[1] || _range[0]);
 			
+			_cubic = _this.config.cubic.split(',');
+			_cubic[0] = parseInt(_cubic[0]);
+			_cubic[1] = parseInt(_cubic[1] || _cubic[0]);
+			_cubic[2] = parseInt(_cubic[2] || _cubic[1] || _cubic[0]);
+			
 			_textures = new Array(_this.config.sources.length);
 			
 			_initShaders();
 			_initBuffers();
+			
+			_this.dispatchEvent(events.SLICEASE_READY, { id: _this.config.id });
 		};
 		
 		function _initShaders() {
@@ -230,17 +239,18 @@
 			_verticesRightIndexBuffer = _webgl.createBuffer();
 		}
 		
-		_this.play = function(index) {
+		_this.play = function(index, converse) {
 			if (_running) {
 				utils.log('Render busy!');
-				return;
+				return false;
 			}
 			
 			if (index < 0 || index >= _this.config.sources.length) {
 				utils.log('Index out of bounds!');
-				return;
+				return false;
 			}
 			
+			_converse = converse;
 			_running = true;
 			_oldIndex = _newIndex;
 			_newIndex = index;
@@ -261,45 +271,49 @@
 			var next = _webgl['TEXTURE' + _newIndex];
 			if (_oldIndex < 0 || _textures[_newIndex] == undefined) {
 				_loader.load(_this.config.sources[_newIndex]);
-				return;
+				return true;
 			}
 			
 			_startTimer();
+			
+			return true;
 		};
 		
 		function _drawCube(index, total) {
-			var wth = 5 / total;
+			var x = _cubic[0] / total;
+			var y = _cubic[1] / 2;
+			var z = _cubic[2] / 2;
 			var vertices = [
 				// Front face
-				-wth,  2.0,  2.0,
-				-wth, -2.0,  2.0,
-				 wth, -2.0,  2.0,
-				 wth,  2.0,  2.0,
+				-x,  y,  z,
+				-x, -y,  z,
+				 x, -y,  z,
+				 x,  y,  z,
 				// Back face
-				-wth, -2.0, -2.0,
-				-wth,  2.0, -2.0,
-				 wth,  2.0, -2.0,
-				 wth, -2.0, -2.0,
+				-x, -y, -z,
+				-x,  y, -z,
+				 x,  y, -z,
+				 x, -y, -z,
 				// Top face
-				-wth,  2.0, -2.0,
-				-wth,  2.0,  2.0,
-				 wth,  2.0,  2.0,
-				 wth,  2.0, -2.0,
+				-x,  y, -z,
+				-x,  y,  z,
+				 x,  y,  z,
+				 x,  y, -z,
 				// Bottom face
-				-wth, -2.0,  2.0,
-				-wth, -2.0, -2.0,
-				 wth, -2.0, -2.0,
-				 wth, -2.0,  2.0,
+				-x, -y,  z,
+				-x, -y, -z,
+				 x, -y, -z,
+				 x, -y,  z,
 				// Left face
-				-wth,  2.0, -2.0,
-				-wth, -2.0, -2.0,
-				-wth, -2.0,  2.0,
-				-wth,  2.0,  2.0,
+				-x,  y, -z,
+				-x, -y, -z,
+				-x, -y,  z,
+				-x,  y,  z,
 				// Right face
-				 wth,  2.0,  2.0,
-				 wth, -2.0,  2.0,
-				 wth, -2.0, -2.0,
-				 wth,  2.0, -2.0
+				 x,  y,  z,
+				 x, -y,  z,
+				 x, -y, -z,
+				 x,  y, -z
 			];
 			_webgl.bindBuffer(_webgl.ARRAY_BUFFER, _verticesBuffer);
 			_webgl.bufferData(_webgl.ARRAY_BUFFER, new Float32Array(vertices), _webgl.STATIC_DRAW);
@@ -414,7 +428,7 @@
 			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesRightIndexBuffer);
 			_webgl.bufferData(_webgl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertexIndices.slice(30, 36)), _webgl.STATIC_DRAW);
 			
-			_setMatrixUniforms(index, total, wth);
+			_setMatrixUniforms(index, total, x);
 			
 			var curr;
 			if (_oldIndex >= 0) {
@@ -424,14 +438,12 @@
 				_webgl.activeTexture(curr);
 				_webgl.bindTexture(_webgl.TEXTURE_2D, _textures[_oldIndex]);
 				_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, "uSampler"), _oldIndex);
-				_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesFrontIndexBuffer);
-				_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			} else {
 				_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, 'uUseTextures'), false);
-				
-				_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesFrontIndexBuffer);
-				_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			}
+			
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesFrontIndexBuffer);
+			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			
 			_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, 'uUseTextures'), true);
 			
@@ -439,14 +451,14 @@
 			_webgl.activeTexture(next);
 			_webgl.bindTexture(_webgl.TEXTURE_2D, _textures[_newIndex]);
 			_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, "uSampler"), _newIndex);
-			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesTopIndexBuffer);
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _converse ? _verticesBottomIndexBuffer : _verticesTopIndexBuffer);
 			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			
 			_webgl.uniform1i(_webgl.getUniformLocation(_shaderProgram, 'uUseTextures'), false);
 			
 			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesBackIndexBuffer);
 			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
-			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesBottomIndexBuffer);
+			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _converse ? _verticesTopIndexBuffer : _verticesBottomIndexBuffer);
 			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
 			_webgl.bindBuffer(_webgl.ELEMENT_ARRAY_BUFFER, _verticesLeftIndexBuffer);
 			_webgl.drawElements(_webgl.TRIANGLES, 6, _webgl.UNSIGNED_SHORT, 0);
@@ -463,13 +475,18 @@
 			var x = (1 - total + index * 2) * width;
 			var z = ratioZ * -10;
 			var r = ratioR * Math.PI / 2;
+			
 			if (_oldIndex < 0) {
 				z = -10 + ratioZ * 10;
 				r = Math.PI / 4 * (1 + ratioR);
 			}
 			
+			if (_converse) {
+				r *= -1;
+			}
+			
 			var modelViewMatrix = mat4.create();
-			mat4.lookAt(modelViewMatrix, [0, 0, 12], [0, 0, 0], [0, 1, 0]);
+			mat4.lookAt(modelViewMatrix, [0, 0, _this.config.distance], [0, 0, 0], [0, 1, 0]);
 			mat4.translate(modelViewMatrix, modelViewMatrix, [x, 0.0, z]);
 			mat4.rotateX(modelViewMatrix, modelViewMatrix, r);
 			var uModelViewMatrix = _webgl.getUniformLocation(_shaderProgram, "uModelViewMatrix");
@@ -521,7 +538,7 @@
 		}
 		
 		function _startTimer() {
-			_this.dispatchEvent(events.SLICEASE_RENDER_UPDATE_START);
+			_this.dispatchEvent(events.SLICEASE_RENDER_UPDATE_START, { index: _newIndex });
 			
 			if (!_timer) {
 				_timer = new utils.timer(15);
@@ -552,8 +569,9 @@
 		}
 		
 		_this.stop = function() {
-			if (_loader) 
+			if (_loader) {
 				_loader.stop();
+			}
 		};
 		
 		_this.element = function() {

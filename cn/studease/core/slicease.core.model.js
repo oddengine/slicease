@@ -7,14 +7,19 @@
 	core.model = function(config) {
 		 var _this = utils.extend(this, new events.eventdispatcher('core.model')),
 		 	_defaults = {},
-		 	_state = states.STOPPED;
+		 	_state = states.STOPPED,
+		 	_properties;
 		
 		function _init() {
 			_this.config = utils.extend({}, _defaults, config);
+			
+			_properties = {
+				
+			};
 		}
 		
 		_this.setState = function(state) {
-			if (state === _state) {
+			if (state == _state) {
 				return;
 			}
 			_state = state;
@@ -25,8 +30,12 @@
 			return _state;
 		};
 		
+		_this.getProperty = function(key) {
+			return _properties[key];
+		};
+		
 		_this.getConfig = function(name) {
-			return _this.config[name] || {};
+			return _this.config[name];
 		};
 		
 		_this.destroy = function() {

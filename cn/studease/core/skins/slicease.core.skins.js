@@ -1,3 +1,7 @@
 ﻿(function(slicease) {
-	slicease.core.skins = {};
+	var skins = slicease.core.skins = {};
+	
+	skins.types = {
+		DEFAULT: 'def'
+	};
 })(slicease);

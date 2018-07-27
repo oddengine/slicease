@@ -4,4 +4,4 @@
 	}
 };
 
-slicease.version = '3.0.06';
+slicease.version = '3.0.07';
