@@ -17,9 +17,29 @@ The example below will find the element with an id of sli-box and render a slice
 slicease('slicer').setup({
 	width: 1000,
 	height: 460,
-	sources: ['images/img1.png', 'images/img2.png', 'images/img3.png', 'images/img4.png'],
+	sources: [{
+		file: 'images/img1.png',
+		link: 'http://studease.cn/slicease',
+		target: '_blank'
+	}, {
+		file: 'images/img2.png',
+		link: 'http://studease.cn/playease',
+		target: '_blank'
+	}, {
+		file: 'images/img3.png',
+		link: 'http://studease.cn/chatease',
+		target: '_blank'
+	}, {
+		file: 'images/img4.png',
+		link: 'http://studease.cn/kiwichatd',
+		target: '_blank'
+	}, {
+		file: 'images/img5.png',
+		link: 'https://github.com/studease/kiwistrmd',
+		target: '_blank'
+	}],
 	range: '3-9',
-	cubic: '5,4',
+	cubic: '10,4',
 	distance: 12
 });
 ```
@@ -33,7 +53,7 @@ _defaults = {
 	aspectratio: '',
 	sources: [],
 	range: '3-9',
-	cubic: '5,4',
+	cubic: '10,4',
 	distance: 12,
 	interval: 5000,
 	controls: true,

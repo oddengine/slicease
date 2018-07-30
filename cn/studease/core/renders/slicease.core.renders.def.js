@@ -270,7 +270,14 @@
 			
 			var next = _webgl['TEXTURE' + _newIndex];
 			if (_oldIndex < 0 || _textures[_newIndex] == undefined) {
-				_loader.load(_this.config.sources[_newIndex]);
+				var item = _this.config.sources[_newIndex];
+				if (utils.typeOf(item) != 'object' || !item.file) {
+					utils.log('Source item should be object contains file property.');
+					return false;
+				}
+				
+				_loader.load(item.file);
+				
 				return true;
 			}
 			
@@ -280,7 +287,7 @@
 		};
 		
 		function _drawCube(index, total) {
-			var x = _cubic[0] / total;
+			var x = _cubic[0] / total / 2;
 			var y = _cubic[1] / 2;
 			var z = _cubic[2] / 2;
 			var vertices = [
@@ -467,7 +474,7 @@
 		}
 		
 		function _setMatrixUniforms(index, total, width) {
-			_animation.z.config.delay = _animation.r.config.delay = index * 100;
+			_animation.z.config.delay = _animation.r.config.delay = (_converse ? total - index - 1 : index) * 100;
 			
 			var time = _timer.currentCount() * _timer.delay;
 			var ratioZ = _animation.z.animate(time);

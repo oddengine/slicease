@@ -16,7 +16,7 @@
 			aspectratio: '',
 			sources: [],
 			range: '3-9',
-			cubic: '5,4',
+			cubic: '10,4',
 			distance: 12,
 			interval: 5000,
 			controls: true,

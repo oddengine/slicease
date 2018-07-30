@@ -13,6 +13,8 @@
 		CONTROLS_CLASS = 'sli-controls',
 		CONTEXTMENU_CLASS = 'sli-contextmenu',
 		
+		NAV_CLASS = 'sli-nav',
+		
 		DISPLAY_CLASS = 'sli-display',
 		DISPLAY_ICON_CLASS = 'sli-display-icon',
 		DISPLAY_LABEL_CLASS = 'sli-display-label',
@@ -84,19 +86,27 @@
 				height: CSS_100PCT,
 				'font-size': '0',
 				'line-height': '0',
-				position: CSS_RELATIVE,
-				background: '#000000'
+				position: CSS_RELATIVE
+			});
+			
+			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS + ' .' + NAV_CLASS, {
+				width: CSS_100PCT,
+				height: CSS_100PCT,
+				top: '0',
+				position: CSS_ABSOLUTE,
+				display: CSS_INLINE_BLOCK,
+				'z-index': '1'
 			});
 			
 			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS, {
 				width: CSS_100PCT,
 				height: CSS_100PCT,
 				'text-align': CSS_CENTER,
-				top: '0px',
+				top: '0',
 				position: CSS_ABSOLUTE,
 				overflow: CSS_HIDDEN,
 				display: CSS_NONE,
-				'z-index': '1'
+				'z-index': '2'
 			});
 			css('.' + SKIN_CLASS + '.' + states.IDLE + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS
 				+ ', .' + SKIN_CLASS + '.' + states.PLAYING + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS
@@ -136,17 +146,18 @@
 			});
 			
 			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS + ' canvas', {
-				'background-color': '#585862'
+				'background-color': 'transparent'
 			});
 			
 			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS, {
-				'z-index': '4'
+				'z-index': '3'
 			});
 			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + PAGES_CLASS, {
 				bottom: '10px',
 				'line-height': '10px',
 				position: CSS_ABSOLUTE,
-				display: CSS_BLOCK
+				display: CSS_BLOCK,
+				'z-index': '4'
 			});
 			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + PAGES_CLASS + ' .' + BUTTON_CLASS, {
 				'margin-right': '8px',
@@ -177,7 +188,8 @@
 				opacity: '.3',
 				background: '#000000',
 				position: CSS_ABSOLUTE,
-				display: CSS_NONE
+				display: CSS_NONE,
+				'z-index': '5'
 			});
 			css('.' + WRAP_CLASS + ':hover .' + CONTROLS_CLASS + ' .' + CONTROL_CLASS, {
 				display: CSS_BLOCK
@@ -209,7 +221,7 @@
 				'white-space': CSS_NOWRAP,
 				position: CSS_ABSOLUTE,
 				display: CSS_NONE,
-				'z-index': '5'
+				'z-index': '6'
 			});
 			css('.' + SKIN_CLASS + ' .' + CONTEXTMENU_CLASS + ' ul', {
 				'list-style': CSS_NONE

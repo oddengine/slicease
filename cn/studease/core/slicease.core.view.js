@@ -11,7 +11,6 @@
 		WRAP_CLASS = 'sli-wrapper',
 		SKIN_CLASS = 'sli-skin',
 		RENDER_CLASS = 'sli-render',
-		POSTER_CLASS = 'sli-poster',
 		CONTROLS_CLASS = 'sli-controls',
 		CONTEXTMENU_CLASS = 'sli-contextmenu',
 		
@@ -33,6 +32,7 @@
 			_controlsLayer,
 			_contextmenuLayer,
 			_controlbar,
+			_navigation,
 			_display,
 			_contextmenu,
 			_render,
@@ -83,6 +83,22 @@
 				_controlbar.addGlobalListener(_forward);
 			} catch (err) {
 				utils.log('Failed to init "controlbar" component!');
+			}
+			
+			// navigation
+			var nvcfg = {
+				width: model.getConfig('width'),
+				height: model.getConfig('height'),
+				sources: model.getConfig('sources')
+			};
+			
+			try {
+				_navigation = new components.navigation(nvcfg);
+				_navigation.addGlobalListener(_forward);
+				
+				_renderLayer.appendChild(_navigation.element());
+			} catch (err) {
+				utils.log('Failed to init "navigation" component!');
 			}
 			
 			// display
@@ -228,6 +244,7 @@
 		
 		function _onUpdateStart(e) {
 			_controlbar.setActive(e.index);
+			_navigation.setActive(e.index);
 			_forward(e);
 		}
 		

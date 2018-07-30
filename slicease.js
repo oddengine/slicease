@@ -4,7 +4,7 @@
 	}
 };
 
-slicease.version = '3.0.07';
+slicease.version = '3.0.08';
 
 (function(slicease) {
 	var utils = slicease.utils = {};
@@ -1219,7 +1219,14 @@ slicease.version = '3.0.07';
 			
 			var next = _webgl['TEXTURE' + _newIndex];
 			if (_oldIndex < 0 || _textures[_newIndex] == undefined) {
-				_loader.load(_this.config.sources[_newIndex]);
+				var item = _this.config.sources[_newIndex];
+				if (utils.typeOf(item) != 'object' || !item.file) {
+					utils.log('Source item should be object contains file property.');
+					return false;
+				}
+				
+				_loader.load(item.file);
+				
 				return true;
 			}
 			
@@ -1229,7 +1236,7 @@ slicease.version = '3.0.07';
 		};
 		
 		function _drawCube(index, total) {
-			var x = _cubic[0] / total;
+			var x = _cubic[0] / total / 2;
 			var y = _cubic[1] / 2;
 			var z = _cubic[2] / 2;
 			var vertices = [
@@ -1416,7 +1423,7 @@ slicease.version = '3.0.07';
 		}
 		
 		function _setMatrixUniforms(index, total, width) {
-			_animation.z.config.delay = _animation.r.config.delay = index * 100;
+			_animation.z.config.delay = _animation.r.config.delay = (_converse ? total - index - 1 : index) * 100;
 			
 			var time = _timer.currentCount() * _timer.delay;
 			var ratioZ = _animation.z.animate(time);
@@ -1563,6 +1570,8 @@ slicease.version = '3.0.07';
 		CONTROLS_CLASS = 'sli-controls',
 		CONTEXTMENU_CLASS = 'sli-contextmenu',
 		
+		NAV_CLASS = 'sli-nav',
+		
 		DISPLAY_CLASS = 'sli-display',
 		DISPLAY_ICON_CLASS = 'sli-display-icon',
 		DISPLAY_LABEL_CLASS = 'sli-display-label',
@@ -1637,15 +1646,24 @@ slicease.version = '3.0.07';
 				position: CSS_RELATIVE
 			});
 			
+			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS + ' .' + NAV_CLASS, {
+				width: CSS_100PCT,
+				height: CSS_100PCT,
+				top: '0',
+				position: CSS_ABSOLUTE,
+				display: CSS_INLINE_BLOCK,
+				'z-index': '1'
+			});
+			
 			css('.' + SKIN_CLASS + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS, {
 				width: CSS_100PCT,
 				height: CSS_100PCT,
 				'text-align': CSS_CENTER,
-				top: '0px',
+				top: '0',
 				position: CSS_ABSOLUTE,
 				overflow: CSS_HIDDEN,
 				display: CSS_NONE,
-				'z-index': '1'
+				'z-index': '2'
 			});
 			css('.' + SKIN_CLASS + '.' + states.IDLE + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS
 				+ ', .' + SKIN_CLASS + '.' + states.PLAYING + ' .' + RENDER_CLASS + ' .' + DISPLAY_CLASS
@@ -1689,13 +1707,14 @@ slicease.version = '3.0.07';
 			});
 			
 			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS, {
-				'z-index': '4'
+				'z-index': '3'
 			});
 			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + PAGES_CLASS, {
 				bottom: '10px',
 				'line-height': '10px',
 				position: CSS_ABSOLUTE,
-				display: CSS_BLOCK
+				display: CSS_BLOCK,
+				'z-index': '4'
 			});
 			css('.' + SKIN_CLASS + ' .' + CONTROLS_CLASS + ' .' + PAGES_CLASS + ' .' + BUTTON_CLASS, {
 				'margin-right': '8px',
@@ -1726,7 +1745,8 @@ slicease.version = '3.0.07';
 				opacity: '.3',
 				background: '#000000',
 				position: CSS_ABSOLUTE,
-				display: CSS_NONE
+				display: CSS_NONE,
+				'z-index': '5'
 			});
 			css('.' + WRAP_CLASS + ':hover .' + CONTROLS_CLASS + ' .' + CONTROL_CLASS, {
 				display: CSS_BLOCK
@@ -1758,7 +1778,7 @@ slicease.version = '3.0.07';
 				'white-space': CSS_NOWRAP,
 				position: CSS_ABSOLUTE,
 				display: CSS_NONE,
-				'z-index': '5'
+				'z-index': '6'
 			});
 			css('.' + SKIN_CLASS + ' .' + CONTEXTMENU_CLASS + ' ul', {
 				'list-style': CSS_NONE
@@ -1898,6 +1918,52 @@ slicease.version = '3.0.07';
 		function _forward(e) {
 			_this.dispatchEvent(e.type, e);
 		}
+		
+		_init();
+	};
+})(slicease);
+
+(function(slicease) {
+	var utils = slicease.utils,
+		css = utils.css,
+		events = slicease.events,
+		core = slicease.core,
+		components = core.components,
+		
+		NAV_CLASS = 'sli-nav',
+		
+		// For all api instances
+		CSS_NONE = 'none',
+		CSS_INLINE_BLOCK = 'inline-block';
+	
+	components.navigation = function(config) {
+		var _this = utils.extend(this, new events.eventdispatcher('components.navigation')),
+			_container;
+		
+		function _init() {
+			_this.config = utils.extend({}, config);
+			
+			_container = utils.createElement('a', NAV_CLASS);
+		}
+		
+		_this.setActive = function(index) {
+			var item = _this.config.sources[index];
+			
+			css.style(_container, {
+				display: item.link ? CSS_INLINE_BLOCK : CSS_NONE
+			});
+			
+			_container.setAttribute('href', item.link || '#');
+			_container.setAttribute('target', item.target || '_blank');
+		};
+		
+		_this.element = function() {
+			return _container;
+		};
+		
+		_this.resize = function(width, height) {
+			
+		};
 		
 		_init();
 	};
@@ -2188,7 +2254,6 @@ slicease.version = '3.0.07';
 		WRAP_CLASS = 'sli-wrapper',
 		SKIN_CLASS = 'sli-skin',
 		RENDER_CLASS = 'sli-render',
-		POSTER_CLASS = 'sli-poster',
 		CONTROLS_CLASS = 'sli-controls',
 		CONTEXTMENU_CLASS = 'sli-contextmenu',
 		
@@ -2210,6 +2275,7 @@ slicease.version = '3.0.07';
 			_controlsLayer,
 			_contextmenuLayer,
 			_controlbar,
+			_navigation,
 			_display,
 			_contextmenu,
 			_render,
@@ -2260,6 +2326,22 @@ slicease.version = '3.0.07';
 				_controlbar.addGlobalListener(_forward);
 			} catch (err) {
 				utils.log('Failed to init "controlbar" component!');
+			}
+			
+			// navigation
+			var nvcfg = {
+				width: model.getConfig('width'),
+				height: model.getConfig('height'),
+				sources: model.getConfig('sources')
+			};
+			
+			try {
+				_navigation = new components.navigation(nvcfg);
+				_navigation.addGlobalListener(_forward);
+				
+				_renderLayer.appendChild(_navigation.element());
+			} catch (err) {
+				utils.log('Failed to init "navigation" component!');
 			}
 			
 			// display
@@ -2405,6 +2487,7 @@ slicease.version = '3.0.07';
 		
 		function _onUpdateStart(e) {
 			_controlbar.setActive(e.index);
+			_navigation.setActive(e.index);
 			_forward(e);
 		}
 		
@@ -2743,7 +2826,7 @@ slicease.version = '3.0.07';
 			aspectratio: '',
 			sources: [],
 			range: '3-9',
-			cubic: '5,4',
+			cubic: '10,4',
 			distance: 12,
 			interval: 5000,
 			controls: true,
