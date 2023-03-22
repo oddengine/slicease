@@ -1,10 +1,10 @@
 # slicease.js 3.0
 
-> [[domain] http://studease.cn](http://studease.cn)
+> [[domain] https://oddengine.com](https://oddengine.com)
 
-> [[source] https://github.com/studease/slicease](https://github.com/studease/slicease)
+> [[source] https://github.com/oddengine/slicease](https://github.com/oddengine/slicease)
 
-> [[zh_doc] http://blog.csdn.net/icysky1989/article/details/39624155](http://blog.csdn.net/icysky1989/article/details/39624155)
+> [[zh_doc] https://blog.csdn.net/icysky1989/article/details/39624155](https://blog.csdn.net/icysky1989/article/details/39624155)
 
 This is a 3D image rotator using webgl, designed for my homepage. 
 
@@ -19,23 +19,23 @@ slicease('slicer').setup({
 	height: 460,
 	sources: [{
 		file: 'images/img1.png',
-		link: 'http://studease.cn/slicease',
+		link: 'https://oddengine.com/product/rtc.html',
 		target: '_blank'
 	}, {
 		file: 'images/img2.png',
-		link: 'http://studease.cn/playease',
+		link: 'https://oddengine.com/product/player.html',
 		target: '_blank'
 	}, {
 		file: 'images/img3.png',
-		link: 'http://studease.cn/chatease',
+		link: 'https://oddengine.com/product/im.html',
 		target: '_blank'
 	}, {
 		file: 'images/img4.png',
-		link: 'http://studease.cn/kiwichatd',
+		link: 'https://oddengine.com/product/live.html',
 		target: '_blank'
 	}, {
 		file: 'images/img5.png',
-		link: 'https://github.com/studease/kiwistrmd',
+		link: 'https://oddengine.com/product/vod.html',
 		target: '_blank'
 	}],
 	range: '3-9',
